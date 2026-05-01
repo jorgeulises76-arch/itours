@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } from 'react-leaflet'
 import { useEffect, useState } from 'react'
 
 type Point = {
@@ -13,23 +13,30 @@ type RouteMapProps = {
   points: Point[]
 }
 
-export default function RouteMap({ points }: RouteMapProps) {const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
+export default function RouteMap({ points }: RouteMapProps) {
+  const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
+  const [accuracy, setAccuracy] = useState<number | null>(null)
   useEffect(() => {
-  navigator.geolocation.getCurrentPosition(
+  const watchId = navigator.geolocation.watchPosition(
     (position) => {
-      setUserPosition([
-        position.coords.latitude,
-        position.coords.longitude,
-      ])
-    },
+  setUserPosition([
+    position.coords.latitude,
+    position.coords.longitude,
+  ])
+  setAccuracy(position.coords.accuracy)
+},
     (error) => {
       console.log('Error geolocation:', error)
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 5000,
     }
   )
+
+  return () => navigator.geolocation.clearWatch(watchId)
 }, [])
-    if (points.length === 0) {
-    return null
-  }
 
   const sortedPoints = [...points].sort(
     (a, b) => a.order_number - b.order_number
@@ -221,11 +228,35 @@ function getDistanceStatus(distanceKm: number) {
           ))}
 
           <Polyline positions={polylinePositions} />
-          {userPosition && (
-  <Marker position={userPosition}>
-    <Popup>Estás aquí</Popup>
-  </Marker>
+
+{userPosition && accuracy && (
+  <CircleMarker
+    center={userPosition}
+    radius={Math.min(accuracy / 5, 40)}
+    pathOptions={{
+      color: '#60a5fa',
+      fillColor: '#93c5fd',
+      fillOpacity: 0.2,
+      weight: 1,
+    }}
+  />
 )}
+
+          {userPosition && (
+  <CircleMarker  
+    center={userPosition}
+    radius={10}
+    pathOptions={{
+      color: '#2563eb',
+      fillColor: '#3b82f6',
+      fillOpacity: 0.9,
+      weight: 3,
+    }}
+  >
+    <Popup>Estás aquí</Popup>
+  </CircleMarker>
+)}
+
 
         </MapContainer>
       </div>
