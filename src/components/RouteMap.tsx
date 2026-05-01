@@ -219,13 +219,22 @@ function getDistanceStatus(distanceKm: number) {
           />
 
           {sortedPoints.map((point, index) => (
-            <Marker
-              key={point.id}
-              position={[point.latitude, point.longitude]}
-            >
-              <Popup>{point.name || `Punto ${index + 1}`}</Popup>
-            </Marker>
-          ))}
+  <CircleMarker
+    key={point.id}
+    center={[point.latitude, point.longitude]}
+    radius={9}
+    pathOptions={{
+      color: '#0f766e',
+      fillColor: '#14b8a6',
+      fillOpacity: 0.95,
+      weight: 3,
+    }}
+  >
+    <Popup>
+      {index + 1}. {point.name || `Punto ${index + 1}`}
+    </Popup>
+  </CircleMarker>
+))}
 
           <Polyline positions={polylinePositions} />
 
