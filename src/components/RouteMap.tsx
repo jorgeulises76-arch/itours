@@ -161,6 +161,12 @@ function getDistanceStatus(distanceKm: number) {
     message: 'Ya estás en la zona de inicio. ¡Disfruta el tour!',
   }
 }
+function speak(text: string) {
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.lang = 'es-ES'
+  window.speechSynthesis.cancel()
+  window.speechSynthesis.speak(utterance)
+}
 function RecenterMap({ position }: { position: [number, number] | null }) {
   const map = useMap()
 
@@ -206,9 +212,19 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     </p>
 
     {currentPoint.point.description ? (
-  <p className="mt-2 text-sm leading-relaxed">
-    {currentPoint.point.description}
-  </p>
+  <div className="mt-2 space-y-2">
+    <p className="text-sm leading-relaxed">
+      {currentPoint.point.description}
+    </p>
+
+    <button
+      type="button"
+      onClick={() => speak(currentPoint.point.description!)}
+      className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
+    >
+      🔊 Escuchar descripción
+    </button>
+  </div>
 ) : (
   <p className="mt-2 text-sm italic text-gray-500">
     (Sin descripción)
