@@ -49,17 +49,19 @@ export default function RouteDetailPage() {
 
       setRoute(data)
 
-      const { data: pointsData, error: pointsError } = await supabase
-        .from('route_points')
-        .select('id, name, latitude, longitude, order_number')
-        .eq('route_id', id)
-        .order('order_number', { ascending: true })
+    const { data: pointsData, error: pointsError } = await supabase
+  .from('route_points')
+  .select('id, name, description, latitude, longitude, order_number')
+  .eq('route_id', id)
+  .order('order_number', { ascending: true })
 
-      if (pointsError) {
-        setError(pointsError.message)
-      } else {
-        setPoints(pointsData || [])
-      }
+console.log('POINTS DATA:', pointsData)
+
+if (pointsError) {
+  setError(pointsError.message)
+} else {
+  setPoints(pointsData || [])
+}
 
       setLoading(false)
     }

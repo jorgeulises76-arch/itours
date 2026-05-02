@@ -1,9 +1,11 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMap } from 'react-leaflet'
+import L from 'leaflet'
 import { useEffect, useState } from 'react'
 
 type Point = {
   id: string
   name: string | null
+  description: string | null
   latitude: number
   longitude: number
   order_number: number
@@ -77,7 +79,7 @@ if (userPosition && sortedPoints.length > 0) {
   )
 }
 const currentPoint =
-  nearestPoint && nearestPoint.distance <= 0.03
+  nearestPoint && nearestPoint.distance <= 0.05
     ? nearestPoint
     : null
 let nextPoint: typeof nearestPoint = null
@@ -159,6 +161,17 @@ function getDistanceStatus(distanceKm: number) {
     message: 'Ya estás en la zona de inicio. ¡Disfruta el tour!',
   }
 }
+function RecenterMap({ position }: { position: [number, number] | null }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (position) {
+      map.flyTo(position, map.getZoom())
+    }
+  }, [position, map])
+
+  return null
+}
   return (
     <div className="mt-6 space-y-4">
       <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
@@ -188,24 +201,33 @@ function getDistanceStatus(distanceKm: number) {
 )}
 {currentPoint && (
   <div className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 text-green-800">
-    {nextPoint && (
-  <div className="mt-4 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-purple-800">
-    <p className="text-lg font-semibold">
-      ➡️ Siguiente parada: {nextPoint.point.name || `Punto ${nextPoint.index + 1}`}
-    </p>
-    <p className="mt-1 text-sm">
-      A {nextPoint.distance.toFixed(2)} km de tu posición actual.
-    </p>
-  </div>
-)}
     <p className="text-lg font-semibold">
       ✅ Estás en: {currentPoint.point.name || `Punto ${currentPoint.index + 1}`}
     </p>
-    <p className="mt-1 text-sm">
-      Ya puedes explorar este punto del recorrido.
-    </p>
+
+    {currentPoint.point.description ? (
+  <p className="mt-2 text-sm leading-relaxed">
+    {currentPoint.point.description}
+  </p>
+) : (
+  <p className="mt-2 text-sm italic text-gray-500">
+    (Sin descripción)
+  </p>
+)}
+
+    {nextPoint && (
+      <div className="mt-4 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-purple-800">
+        <p className="text-lg font-semibold">
+          ➡️ Siguiente parada: {nextPoint.point.name || `Punto ${nextPoint.index + 1}`}
+        </p>
+        <p className="mt-1 text-sm">
+          A {nextPoint.distance.toFixed(2)} km de tu posición actual.
+        </p>
+      </div>
+    )}
   </div>
 )}
+
       <div className="h-80 overflow-hidden rounded-2xl border shadow-sm">
         <MapContainer
           center={center}
@@ -213,27 +235,45 @@ function getDistanceStatus(distanceKm: number) {
           scrollWheelZoom={true}
           className="h-full w-full"
         >
+          <RecenterMap position={userPosition} />
+          
           <TileLayer
             attribution="&copy; OpenStreetMap contributors"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
           {sortedPoints.map((point, index) => (
-  <CircleMarker
+  <Marker
     key={point.id}
-    center={[point.latitude, point.longitude]}
-    radius={9}
-    pathOptions={{
-      color: '#0f766e',
-      fillColor: '#14b8a6',
-      fillOpacity: 0.95,
-      weight: 3,
-    }}
+    position={[point.latitude, point.longitude]}
+    icon={L.divIcon({
+      className: '',
+      html: `
+        <div style="
+          width: 28px;
+          height: 28px;
+          border-radius: 9999px;
+          background: #14b8a6;
+          border: 3px solid white;
+          color: white;
+          font-weight: bold;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+          font-size: 14px;
+        ">
+          ${index + 1}
+        </div>
+      `,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+    })}
   >
     <Popup>
       {index + 1}. {point.name || `Punto ${index + 1}`}
     </Popup>
-  </CircleMarker>
+  </Marker>
 ))}
 
           <Polyline positions={polylinePositions} />
