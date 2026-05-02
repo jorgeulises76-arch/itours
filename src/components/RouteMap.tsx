@@ -1,6 +1,8 @@
 import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useEffect, useState } from 'react'
+import 'leaflet-routing-machine'
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 
 type Point = {
   id: string
@@ -79,7 +81,7 @@ if (userPosition && sortedPoints.length > 0) {
   )
 }
 const currentPoint =
-  nearestPoint && nearestPoint.distance <= 0.05
+  nearestPoint && nearestPoint.distance <= 1
     ? nearestPoint
     : null
 let nextPoint: typeof nearestPoint = null
@@ -167,6 +169,42 @@ function speak(text: string) {
   window.speechSynthesis.cancel()
   window.speechSynthesis.speak(utterance)
 }
+function RoutingToNextPoint({
+  userPosition,
+  nextPoint,
+}: {
+  userPosition: [number, number] | null
+  nextPoint:
+    | {
+        point: Point
+        index: number
+        distance: number
+      }
+    | null
+}) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!userPosition || !nextPoint) return
+
+    const routingControl = L.Routing.control({
+      waypoints: [
+        L.latLng(userPosition[0], userPosition[1]),
+        L.latLng(nextPoint.point.latitude, nextPoint.point.longitude),
+      ],
+      routeWhileDragging: false,
+      show: false,
+      addWaypoints: false,
+      fitSelectedRoutes: false,
+    }).addTo(map)
+
+    return () => {
+      map.removeControl(routingControl)
+    }
+  }, [map, userPosition, nextPoint])
+
+  return null
+}
 function RecenterMap({ position }: { position: [number, number] | null }) {
   const map = useMap()
 
@@ -252,6 +290,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
           className="h-full w-full"
         >
           <RecenterMap position={userPosition} />
+          <RoutingToNextPoint userPosition={userPosition} nextPoint={nextPoint} />
           
           <TileLayer
             attribution="&copy; OpenStreetMap contributors"
