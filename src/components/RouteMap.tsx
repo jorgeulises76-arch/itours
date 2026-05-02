@@ -81,7 +81,7 @@ if (userPosition && sortedPoints.length > 0) {
   )
 }
 const currentPoint =
-  nearestPoint && nearestPoint.distance <= 1
+  nearestPoint && nearestPoint.distance <= 0.02
     ? nearestPoint
     : null
 let nextPoint: typeof nearestPoint = null
@@ -188,15 +188,20 @@ function RoutingToNextPoint({
     if (!userPosition || !nextPoint) return
 
     const routingControl = L.Routing.control({
-      waypoints: [
-        L.latLng(userPosition[0], userPosition[1]),
-        L.latLng(nextPoint.point.latitude, nextPoint.point.longitude),
-      ],
-      routeWhileDragging: false,
-      show: false,
-      addWaypoints: false,
-      fitSelectedRoutes: false,
-    }).addTo(map)
+  router: L.Routing.osrmv1({
+    serviceUrl: 'https://router.project-osrm.org/route/v1',
+    profile: 'foot',
+  }),
+
+  waypoints: [
+    L.latLng(userPosition[0], userPosition[1]),
+    L.latLng(nextPoint.point.latitude, nextPoint.point.longitude),
+  ],
+  routeWhileDragging: false,
+  show: false,
+  addWaypoints: false,
+  fitSelectedRoutes: false,
+}).addTo(map)
 
     return () => {
       map.removeControl(routingControl)
@@ -331,7 +336,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   </Marker>
 ))}
 
-          <Polyline positions={polylinePositions} />
+          {/* <Polyline positions={polylinePositions} /> */}
 
 {userPosition && accuracy && (
   <CircleMarker
