@@ -169,6 +169,7 @@ function speak(text: string) {
   window.speechSynthesis.cancel()
   window.speechSynthesis.speak(utterance)
 }
+
 function RoutingToNextPoint({
   userPosition,
   nextPoint,
@@ -250,6 +251,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
 )}
 {currentPoint && (
   <div className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 text-green-800">
+    
     <p className="text-lg font-semibold">
       ✅ Estás en: {currentPoint.point.name || `Punto ${currentPoint.index + 1}`}
     </p>
@@ -275,15 +277,24 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
 )}
 
     {nextPoint && (
-      <div className="mt-4 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-purple-800">
-        <p className="text-lg font-semibold">
-          ➡️ Siguiente parada: {nextPoint.point.name || `Punto ${nextPoint.index + 1}`}
-        </p>
-        <p className="mt-1 text-sm">
-          A {nextPoint.distance.toFixed(2)} km de tu posición actual.
-        </p>
-      </div>
-    )}
+  <div className="mt-4 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-purple-800">
+    <p className="text-lg font-semibold">
+      ➡️ Siguiente parada: {nextPoint.point.name || `Punto ${nextPoint.index + 1}`}
+    </p>
+
+    <p className="mt-1 text-sm">
+      A {nextPoint.distance.toFixed(2)} km de tu posición actual.
+    </p>
+    <a
+  href={`https://www.google.com/maps/dir/?api=1&destination=${nextPoint.point.latitude},${nextPoint.point.longitude}&travelmode=walking`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="mt-3 inline-block rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
+>
+  🧭 Navegar con Google Maps
+</a>
+  </div>
+)}
   </div>
 )}
 
