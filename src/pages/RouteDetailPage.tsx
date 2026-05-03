@@ -118,9 +118,7 @@ if (pointsError) {
               <p className="font-medium">
   {point.name || `Punto ${index + 1}`}
 </p>
-              <p className="text-gray-600">
-                📍 {point.latitude}, {point.longitude}
-              </p>
+              
             </div>
           ))}
         </div>
