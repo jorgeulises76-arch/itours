@@ -105,7 +105,16 @@ if (currentPoint && sortedPoints.length > 0) {
 const distanceStatus = distanceToStart !== null
   ? getDistanceStatus(distanceToStart)
   : null
+const shouldGuideToStart =
+  distanceToStart !== null && distanceToStart > 0.1
 
+const targetPoint = shouldGuideToStart
+  ? sortedPoints[0]
+  : nearestPoint?.point
+
+const navigationText = shouldGuideToStart
+  ? 'Ir al inicio de la ruta'
+  : 'Ir al punto más cercano'
   const center: [number, number] = [
     sortedPoints[0].latitude,
     sortedPoints[0].longitude,
@@ -236,6 +245,17 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     <p className="mt-1 text-sm">
       {distanceStatus.message}
     </p>
+    
+    {targetPoint && (
+  <a
+    href={`https://www.google.com/maps/dir/?api=1&destination=${targetPoint.latitude},${targetPoint.longitude}&travelmode=walking`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="mt-3 inline-block rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
+  >
+    🧭 {navigationText}
+  </a>
+)}
   </div>
 )}
 
@@ -268,6 +288,9 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
       className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
     >
       🔊 Escuchar descripción
+      <p className="mt-2 text-sm text-purple-700">
+  Usa el botón de navegación para llegar al siguiente punto. Cuando llegues, vuelve aquí para continuar la ruta.
+</p>
     </button>
   </div>
 ) : (
