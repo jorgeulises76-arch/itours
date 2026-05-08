@@ -115,6 +115,10 @@ const targetPoint = shouldGuideToStart
 const navigationText = shouldGuideToStart
   ? 'Ir al inicio de la ruta'
   : 'Ir al punto más cercano'
+
+  const isNearestPointIntermediate =
+  nearestPoint !== null && nearestPoint.index > 0 && !currentPoint
+
   const center: [number, number] = [
     sortedPoints[0].latitude,
     sortedPoints[0].longitude,
@@ -261,12 +265,47 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
 
 {nearestPoint && !currentPoint && (
   <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-800">
+
     <p className="text-lg font-semibold">
-      🧭 Punto más cercano: Punto {nearestPoint.index + 1}
+      🧭 Punto más cercano: Punto {nearestPoint.point.name}
     </p>
+
     <p className="mt-1 text-sm">
       Estás a {nearestPoint.distance.toFixed(2)} km de este punto.
     </p>
+
+    {isNearestPointIntermediate && (
+      <div className="mt-3 rounded-xl bg-white/70 p-3 text-sm text-blue-900">
+        <p>
+          Estás más cerca de un punto intermedio de la ruta.
+        </p>
+
+        <p className="mt-1">
+          Puedes empezar desde aquí o ir al inicio para hacer la ruta completa.
+        </p>
+
+        <div className="mt-3 flex gap-2">
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${sortedPoints[0].latitude},${sortedPoints[0].longitude}&travelmode=walking`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-xl bg-blue-700 px-3 py-2 text-white"
+          >
+            🧭 Ir al inicio
+          </a>
+
+          <a
+  href={`https://www.google.com/maps/dir/?api=1&destination=${nearestPoint.point.latitude},${nearestPoint.point.longitude}&travelmode=walking`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="rounded-xl bg-green-600 px-3 py-2 text-white"
+>
+  📍 Empezar desde aquí
+</a>
+        </div>
+      </div>
+    )}
+
   </div>
 )}
 {currentPoint && (
@@ -283,15 +322,12 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     </p>
 
     <button
-      type="button"
-      onClick={() => speak(currentPoint.point.description!)}
-      className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
-    >
-      🔊 Escuchar descripción
-      <p className="mt-2 text-sm text-purple-700">
-  Usa el botón de navegación para llegar al siguiente punto. Cuando llegues, vuelve aquí para continuar la ruta.
-</p>
-    </button>
+  type="button"
+  onClick={() => speak(currentPoint.point.description!)}
+  className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
+>
+  🔊 Escuchar descripción
+  </button>
   </div>
 ) : (
   <p className="mt-2 text-sm italic text-gray-500">
