@@ -12,6 +12,7 @@ type RouteData = {
   duration_estimated: number | null
   distance_km: number | null
   city_id: string
+  is_premium?: boolean
 }
 
 type RoutePoint = {
@@ -39,7 +40,7 @@ export default function RouteDetailPage() {
 
       const { data, error } = await supabase
         .from('routes')
-        .select('id, title, description, duration_estimated, distance_km, city_id')
+        .select('id, title, description, duration_estimated, distance_km, city_id, is_premium')
         .eq('id', id)
         .single()
 
@@ -98,7 +99,17 @@ export default function RouteDetailPage() {
             Volver
           </Link>
 
-          <p className="mb-1 text-sm text-gray-200">Ruta guiada con GPS</p>
+          <div className="mb-3 flex items-center gap-2">
+  {route.is_premium && (
+    <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-yellow-900">
+      ⭐ PREMIUM
+    </span>
+  )}
+
+  <span className="text-sm text-gray-200">
+    Ruta guiada con GPS
+  </span>
+</div>
 
           <h1 className="text-4xl font-extrabold leading-tight">
             {route.title || 'Ruta sin título'}
@@ -139,9 +150,30 @@ export default function RouteDetailPage() {
           )}
         </div>
 
-        <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
-          <RouteMap points={points} />
-        </div>
+        {route.is_premium ? (
+  <div className="rounded-3xl bg-white p-8 shadow-lg">
+    <div className="text-center">
+      <div className="mb-4 text-5xl">🔒</div>
+
+      <h2 className="text-2xl font-bold text-gray-800">
+        Ruta Premium
+      </h2>
+
+      <p className="mt-3 text-sm leading-relaxed text-gray-600">
+        Esta experiencia premium estará disponible próximamente en iTours.
+        Incluye navegación completa, contenido ampliado y una experiencia guiada mejorada.
+      </p>
+
+      <button className="mt-6 rounded-full bg-yellow-400 px-6 py-3 font-semibold text-yellow-900 shadow-md transition hover:scale-105">
+        Próximamente
+      </button>
+    </div>
+  </div>
+) : (
+  <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
+    <RouteMap points={points} />
+  </div>
+)}
 
         <div className="mt-6">
           <div className="mb-4 flex items-center gap-3">

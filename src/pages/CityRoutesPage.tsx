@@ -13,6 +13,7 @@ type Route = {
   id: string
   title: string
   description?: string | null
+  is_premium?: boolean
 }
 
 export default function CityRoutesPage() {
@@ -42,7 +43,7 @@ export default function CityRoutesPage() {
 
       const { data: routesData, error: routesError } = await supabase
         .from('routes')
-        .select('id, title, description')
+        .select('id, title, description, is_premium')  
         .eq('city_id', id)
 
       if (routesError) {
@@ -129,9 +130,15 @@ export default function CityRoutesPage() {
                       <RouteIcon size={22} />
                     </div>
 
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
-                      Ruta guiada
-                    </span>
+                    <span
+  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+    route.is_premium
+      ? 'bg-yellow-100 text-yellow-700'
+      : 'bg-gray-100 text-gray-600'
+  }`}
+>
+  {route.is_premium ? '⭐ Premium' : 'Ruta guiada'}
+</span>
                   </div>
 
                   <h3 className="text-xl font-bold text-gray-800">
