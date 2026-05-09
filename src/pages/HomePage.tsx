@@ -44,7 +44,7 @@ export default function HomePage() {
       
       {/* HERO */}
       <div
-        className="relative h-72 bg-cover bg-center"
+        className="relative h-72 bg-cover bg-center transition duration-700"
         style={{
           backgroundImage:
   "url('https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?q=80&w=1600&auto=format&fit=crop')",
@@ -83,7 +83,7 @@ export default function HomePage() {
             <Link
               key={city.id}
               to={`/city/${city.id}`}
-              className="group overflow-hidden rounded-3xl bg-white shadow-md transition hover:-translate-y-1 hover:shadow-xl"
+              className="group overflow-hidden rounded-3xl bg-white shadow-md transition duration-300 hover:-translate-y-2 hover:shadow-2xl"
             >
               <div className="h-40 overflow-hidden">
                 <img

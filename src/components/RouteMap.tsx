@@ -90,6 +90,12 @@ const currentPoint =
 useEffect(() => {
   if (!currentPoint) return
 
+  speak(
+    `Has llegado a ${
+      currentPoint.point.name || `el punto ${currentPoint.index + 1}`
+    }`
+  )
+
   if (currentPoint.index >= routeProgressIndex) {
     const nextIndex = Math.min(
       currentPoint.index + 1,
@@ -100,9 +106,12 @@ useEffect(() => {
   }
 }, [currentPoint, routeProgressIndex, sortedPoints.length])
 
+const isLastPoint =
+  currentPoint !== null && currentPoint.index === sortedPoints.length - 1
+
 let nextPoint: typeof nearestPoint = null
 
-if (userPosition && sortedPoints.length > 0) {
+if (userPosition && sortedPoints.length > 0 && !isLastPoint) {
   const pointToNavigate = sortedPoints[routeProgressIndex]
 
   nextPoint = {
@@ -350,8 +359,31 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     (Sin descripción)
   </p>
 )}
+{isLastPoint && (
+  <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-800">
+    <p className="text-lg font-semibold">
+      🎉 Has llegado al final de la ruta
+    </p>
 
-    {nextPoint && (
+    <p className="mt-2 text-sm">
+      Gracias por hacer este recorrido con iTours. Esperamos que hayas disfrutado
+      la experiencia.
+    </p>
+
+    <p className="mt-2 text-sm">
+      Puedes volver al listado de rutas para descubrir nuevos recorridos cercanos.
+    </p>
+
+    <a
+      href="/"
+      className="mt-4 inline-block rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-md"
+    >
+      Explorar nuevas rutas
+    </a>
+  </div>
+)}
+
+    {nextPoint && !isLastPoint && (
   <div className="mt-4 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-purple-800">
     <p className="text-lg font-semibold">
       ➡️ Siguiente parada: {nextPoint.point.name || `Punto ${nextPoint.index + 1}`}
@@ -366,7 +398,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   rel="noopener noreferrer"
   className="mt-3 inline-block rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
 >
-  🧭 Navegar con Google Maps
+  🧭 Iniciar navegación
 </a>
   </div>
 )}
