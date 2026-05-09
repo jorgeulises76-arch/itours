@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MapPin } from 'lucide-react'
 import { supabase } from '../services/supabaseClient'
+import molletImage from '../assets/Mollet.jpeg'
 
 type City = {
   id: string
@@ -90,7 +91,7 @@ export default function HomePage() {
                   src={
                     city.name === 'Barcelona'
                       ? 'https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?q=80&w=1200&auto=format&fit=crop'
-                      : 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop'
+                      : molletImage
                   }
                   alt={city.name}
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
