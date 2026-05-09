@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { ArrowLeft, MapPin, Clock, Route as RouteIcon } from 'lucide-react'
 import { supabase } from '../services/supabaseClient'
+import molletImage from '../assets/Mollet.jpg'
 
 type City = {
   id: string
@@ -63,36 +65,106 @@ export default function CityRoutesPage() {
     return <div className="p-6 text-red-600">Error: {error}</div>
   }
 
+  const heroImage =
+    city?.name === 'Mollet del Vallès'
+      ? molletImage
+      : 'https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?q=80&w=1600&auto=format&fit=crop'
+
   return (
-    <div className="p-6">
-      <Link to="/" className="mb-4 inline-block text-blue-600">
-        ← Volver a ciudades
-      </Link>
+    <div className="min-h-screen bg-gray-100">
+      <div
+        className="relative h-64 bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroImage})` }}
+      >
+        <div className="absolute inset-0 bg-black/45" />
 
-      <h1 className="mb-4 text-3xl font-bold text-blue-600">
-        Rutas de {city?.name}
-      </h1>
+        <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-8 text-white">
+          <Link
+            to="/"
+            className="mb-6 flex w-fit items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-medium backdrop-blur-md"
+          >
+            <ArrowLeft size={18} />
+            Volver
+          </Link>
 
-      {routes.length === 0 ? (
-        <p>No hay rutas para esta ciudad.</p>
-      ) : (
-        <div className="grid gap-4">
-          {routes.map((route) => (
-            <Link
-              to={`/route/${route.id}`}
-              key={route.id}
-              className="block rounded-2xl border p-4 shadow-sm transition hover:shadow-md"
-            >
-              <h3 className="text-lg font-semibold">{route.title}</h3>
-              {route.description && (
-                <p className="mt-1 text-sm text-gray-600">
-                  {route.description}
-                </p>
-              )}
-            </Link>
-          ))}
+          <p className="mb-1 text-sm text-gray-200">Rutas disponibles</p>
+
+          <h1 className="text-4xl font-extrabold">
+            {city?.name}
+          </h1>
         </div>
-      )}
+      </div>
+
+      <div className="px-5 py-6">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Elige una ruta
+            </h2>
+            <p className="text-sm text-gray-500">
+              Explora recorridos guiados a tu ritmo
+            </p>
+          </div>
+
+          <div className="rounded-full bg-blue-100 p-3 text-blue-600">
+            <MapPin size={22} />
+          </div>
+        </div>
+
+        {routes.length === 0 ? (
+          <div className="rounded-3xl bg-white p-5 text-gray-600 shadow-md">
+            No hay rutas disponibles para esta ciudad.
+          </div>
+        ) : (
+          <div className="grid gap-5">
+            {routes.map((route) => (
+              <Link
+                to={`/route/${route.id}`}
+                key={route.id}
+                className="group block overflow-hidden rounded-3xl bg-white shadow-md transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="p-5">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="rounded-full bg-blue-100 p-3 text-blue-600">
+                      <RouteIcon size={22} />
+                    </div>
+
+                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+                      Ruta guiada
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-gray-800">
+                    {route.title}
+                  </h3>
+
+                  {route.description && (
+                    <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                      {route.description}
+                    </p>
+                  )}
+
+                  <div className="mt-5 flex items-center gap-4 text-sm text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Clock size={16} />
+                      A tu ritmo
+                    </span>
+
+                    <span className="flex items-center gap-1">
+                      <MapPin size={16} />
+                      Con GPS
+                    </span>
+                  </div>
+
+                  <div className="mt-5 rounded-full bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white shadow-md transition group-hover:bg-blue-700">
+                    Empezar ruta
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -274,7 +274,9 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     <div className="mt-6 space-y-4">
       <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
 {distanceToStart !== null && distanceStatus && !currentPoint && (
-  <div className={`mt-4 rounded-2xl border p-4 ${distanceStatus.color}`}>
+  <div
+  className={`mt-4 rounded-3xl border p-5 shadow-md backdrop-blur-sm ${distanceStatus.color}`}
+>
     <p className="text-lg font-semibold">
       {distanceStatus.icon} {distanceStatus.title}
     </p>
@@ -418,7 +420,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
       <div className="h-80 overflow-hidden rounded-2xl border shadow-sm">
         <MapContainer
           center={center}
-          zoom={15}
+          zoom={16}
           scrollWheelZoom={true}
           className="h-full w-full"
         >
@@ -464,39 +466,32 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   </Marker>
 ))}
 
-          <Polyline
-  positions={polylinePositions}
-  pathOptions={{
-    color: '#2563eb',
-    weight: 4,
-    opacity: 0.8,
-  }}
-/>
+          
 
 {userPosition && accuracy && (
   <CircleMarker
     center={userPosition}
-    radius={Math.min(accuracy / 5, 40)}
+    radius={Math.min(accuracy / 4, 50)}
     pathOptions={{
       color: '#60a5fa',
       fillColor: '#93c5fd',
-      fillOpacity: 0.2,
+      fillOpacity: 0.12,
       weight: 1,
     }}
   />
 )}
 
           {userPosition && (
-  <CircleMarker  
-    center={userPosition}
-    radius={10}
-    pathOptions={{
-      color: '#2563eb',
-      fillColor: '#3b82f6',
-      fillOpacity: 0.9,
-      weight: 3,
-    }}
-  >
+  <CircleMarker
+  center={userPosition}
+  radius={12}
+  pathOptions={{
+    color: '#ffffff',
+    fillColor: '#2563eb',
+    fillOpacity: 1,
+    weight: 4,
+  }}
+>
     <Popup>Estás aquí</Popup>
   </CircleMarker>
 )}

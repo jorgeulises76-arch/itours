@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { ArrowLeft, Clock, MapPin, ListOrdered } from 'lucide-react'
 import { supabase } from '../services/supabaseClient'
 import RouteMap from '../components/RouteMap'
+import molletImage from '../assets/Mollet.jpg'
 
 type RouteData = {
   id: string
@@ -49,19 +51,17 @@ export default function RouteDetailPage() {
 
       setRoute(data)
 
-    const { data: pointsData, error: pointsError } = await supabase
-  .from('route_points')
-  .select('id, name, description, latitude, longitude, order_number')
-  .eq('route_id', id)
-  .order('order_number', { ascending: true })
+      const { data: pointsData, error: pointsError } = await supabase
+        .from('route_points')
+        .select('id, name, description, latitude, longitude, order_number')
+        .eq('route_id', id)
+        .order('order_number', { ascending: true })
 
-console.log('POINTS DATA:', pointsData)
-
-if (pointsError) {
-  setError(pointsError.message)
-} else {
-  setPoints(pointsData || [])
-}
+      if (pointsError) {
+        setError(pointsError.message)
+      } else {
+        setPoints(pointsData || [])
+      }
 
       setLoading(false)
     }
@@ -82,45 +82,104 @@ if (pointsError) {
   }
 
   return (
-    <div className="p-6">
-      <Link to={`/city/${route.city_id}`} className="text-blue-600">
-        ← Volver a rutas
-      </Link>
+    <div className="min-h-screen bg-gray-100">
+      <div
+        className="relative h-64 bg-cover bg-center"
+        style={{ backgroundImage: `url(${molletImage})` }}
+      >
+        <div className="absolute inset-0 bg-black/45" />
 
-      <h1 className="mt-4 text-3xl font-bold text-blue-600">
-        {route.title || 'Ruta sin título'}
-      </h1>
+        <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-8 text-white">
+          <Link
+            to={`/city/${route.city_id}`}
+            className="mb-6 flex w-fit items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-medium backdrop-blur-md"
+          >
+            <ArrowLeft size={18} />
+            Volver
+          </Link>
 
-      {route.description && (
-        <p className="mt-2 text-gray-600">{route.description}</p>
-      )}
+          <p className="mb-1 text-sm text-gray-200">Ruta guiada con GPS</p>
 
-      <div className="mt-4 space-y-2 text-sm text-gray-700">
-        {route.duration_estimated !== null && (
-          <p>⏱ Duración: {route.duration_estimated} min</p>
-        )}
-        {route.distance_km !== null && (
-          <p>📍 Distancia: {route.distance_km} km</p>
-        )}
+          <h1 className="text-4xl font-extrabold leading-tight">
+            {route.title || 'Ruta sin título'}
+          </h1>
+        </div>
       </div>
 
-      <RouteMap points={points} />
+      <div className="px-5 py-6">
+        {route.description && (
+          <p className="mb-5 rounded-3xl bg-white p-5 text-sm leading-relaxed text-gray-600 shadow-md">
+            {route.description}
+          </p>
+        )}
 
-      <div className="mt-6">
-        <h2 className="mb-3 text-xl font-semibold">Puntos de la ruta</h2>
-
-        <div className="space-y-3">
-          {points.map((point, index) => (
-            <div
-              key={point.id}
-              className="rounded-xl border p-3 text-sm shadow-sm"
-            >
-              <p className="font-medium">
-  {point.name || `Punto ${index + 1}`}
-</p>
-              
+        <div className="mb-6 grid grid-cols-2 gap-4">
+          {route.duration_estimated !== null && (
+            <div className="rounded-3xl bg-white p-4 shadow-md">
+              <div className="mb-2 w-fit rounded-full bg-blue-100 p-2 text-blue-600">
+                <Clock size={20} />
+              </div>
+              <p className="text-xs font-medium text-gray-500">Duración</p>
+              <p className="text-lg font-bold text-gray-800">
+                {route.duration_estimated} min
+              </p>
             </div>
-          ))}
+          )}
+
+          {route.distance_km !== null && (
+            <div className="rounded-3xl bg-white p-4 shadow-md">
+              <div className="mb-2 w-fit rounded-full bg-blue-100 p-2 text-blue-600">
+                <MapPin size={20} />
+              </div>
+              <p className="text-xs font-medium text-gray-500">Distancia</p>
+              <p className="text-lg font-bold text-gray-800">
+                {route.distance_km} km
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
+          <RouteMap points={points} />
+        </div>
+
+        <div className="mt-6">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="rounded-full bg-blue-100 p-3 text-blue-600">
+              <ListOrdered size={22} />
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">
+                Puntos de la ruta
+              </h2>
+              <p className="text-sm text-gray-500">
+                Sigue las paradas en orden
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {points.map((point, index) => (
+              <div
+                key={point.id}
+                className="flex items-center gap-4 rounded-3xl bg-white p-4 shadow-md"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                  {index + 1}
+                </div>
+
+                <div>
+                  <p className="font-semibold text-gray-800">
+                    {point.name || `Punto ${index + 1}`}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Parada del recorrido
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
