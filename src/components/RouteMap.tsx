@@ -20,6 +20,7 @@ type RouteMapProps = {
 export default function RouteMap({ points }: RouteMapProps) {
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
+  const [routeProgressIndex, setRouteProgressIndex] = useState(0)
   useEffect(() => {
   const watchId = navigator.geolocation.watchPosition(
     (position) => {
@@ -69,52 +70,67 @@ if (userPosition && sortedPoints.length > 0) {
     point,
     index,
     distance: getDistance(
-  userPosition[0],
-  userPosition[1],
-  point.latitude,
-  point.longitude
-),
+      userPosition[0],
+      userPosition[1],
+      point.latitude,
+      point.longitude
+    ),
   }))
 
   nearestPoint = distances.reduce((closest, current) =>
     current.distance < closest.distance ? current : closest
   )
 }
+
 const currentPoint =
   nearestPoint && nearestPoint.distance <= 0.02
     ? nearestPoint
     : null
+
+useEffect(() => {
+  if (!currentPoint) return
+
+  if (currentPoint.index >= routeProgressIndex) {
+    const nextIndex = Math.min(
+      currentPoint.index + 1,
+      sortedPoints.length - 1
+    )
+
+    setRouteProgressIndex(nextIndex)
+  }
+}, [currentPoint, routeProgressIndex, sortedPoints.length])
+
 let nextPoint: typeof nearestPoint = null
 
-if (currentPoint && sortedPoints.length > 0) {
-  const nextIndex = currentPoint.index + 1
+if (userPosition && sortedPoints.length > 0) {
+  const pointToNavigate = sortedPoints[routeProgressIndex]
 
-  if (nextIndex < sortedPoints.length) {
-    nextPoint = {
-      point: sortedPoints[nextIndex],
-      index: nextIndex,
-      distance: getDistance(
-        userPosition![0],
-        userPosition![1],
-        sortedPoints[nextIndex].latitude,
-        sortedPoints[nextIndex].longitude
-      ),
-    }
+  nextPoint = {
+    point: pointToNavigate,
+    index: routeProgressIndex,
+    distance: getDistance(
+      userPosition[0],
+      userPosition[1],
+      pointToNavigate.latitude,
+      pointToNavigate.longitude
+    ),
   }
 }
+
 const distanceStatus = distanceToStart !== null
   ? getDistanceStatus(distanceToStart)
   : null
+
 const shouldGuideToStart =
-  distanceToStart !== null && distanceToStart > 0.1
+  routeProgressIndex === 0 && distanceToStart !== null && distanceToStart > 0.1
 
 const targetPoint = shouldGuideToStart
   ? sortedPoints[0]
-  : nearestPoint?.point
+  : sortedPoints[routeProgressIndex]
 
 const navigationText = shouldGuideToStart
   ? 'Ir al inicio de la ruta'
-  : 'Ir al punto más cercano'
+  : `Continuar al punto ${routeProgressIndex + 1}`
 
   const isNearestPointIntermediate =
   nearestPoint !== null && nearestPoint.index > 0 && !currentPoint

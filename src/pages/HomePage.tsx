@@ -60,6 +60,11 @@ export default function HomePage() {
           </p>
 
           <button
+  onClick={() =>
+    document.getElementById('cities-section')?.scrollIntoView({
+      behavior: 'smooth',
+    })
+  }
   className="mt-6 w-fit rounded-full bg-blue-600 px-7 py-3 text-lg font-semibold shadow-2xl transition hover:scale-105 hover:bg-blue-700"
 >
   Explorar rutas
@@ -68,7 +73,7 @@ export default function HomePage() {
       </div>
 
       {/* CONTENIDO */}
-      <div className="px-5 py-6">
+      <div id="cities-section" className="px-5 py-6">
         <h2 className="mb-5 text-2xl font-bold text-gray-800">
           Ciudades disponibles
         </h2>
