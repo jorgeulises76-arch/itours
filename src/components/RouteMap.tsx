@@ -21,6 +21,7 @@ export default function RouteMap({ points }: RouteMapProps) {
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
   const [routeProgressIndex, setRouteProgressIndex] = useState(0)
+  const [lastSpokenPointIndex, setLastSpokenPointIndex] = useState<number | null>(null)
   useEffect(() => {
   const watchId = navigator.geolocation.watchPosition(
     (position) => {
@@ -90,11 +91,15 @@ const currentPoint =
 useEffect(() => {
   if (!currentPoint) return
 
-  speak(
-    `Has llegado a ${
-      currentPoint.point.name || `el punto ${currentPoint.index + 1}`
-    }`
-  )
+  if (currentPoint.index !== lastSpokenPointIndex) {
+    speak(
+      `Has llegado a ${
+        currentPoint.point.name || `el punto ${currentPoint.index + 1}`
+      }`
+    )
+
+    setLastSpokenPointIndex(currentPoint.index)
+  }
 
   if (currentPoint.index >= routeProgressIndex) {
     const nextIndex = Math.min(
@@ -104,7 +109,12 @@ useEffect(() => {
 
     setRouteProgressIndex(nextIndex)
   }
-}, [currentPoint, routeProgressIndex, sortedPoints.length])
+}, [
+  currentPoint,
+  lastSpokenPointIndex,
+  routeProgressIndex,
+  sortedPoints.length,
+])
 
 const isLastPoint =
   currentPoint !== null && currentPoint.index === sortedPoints.length - 1
@@ -413,7 +423,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
           className="h-full w-full"
         >
           <RecenterMap position={userPosition} />
-          <RoutingToNextPoint userPosition={userPosition} nextPoint={nextPoint} />
+          
           
           <TileLayer
             attribution="&copy; OpenStreetMap contributors"
@@ -454,7 +464,14 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   </Marker>
 ))}
 
-          {/* <Polyline positions={polylinePositions} /> */}
+          <Polyline
+  positions={polylinePositions}
+  pathOptions={{
+    color: '#2563eb',
+    weight: 4,
+    opacity: 0.8,
+  }}
+/>
 
 {userPosition && accuracy && (
   <CircleMarker
