@@ -164,9 +164,12 @@ export default function RouteDetailPage() {
         Incluye navegación completa, contenido ampliado y una experiencia guiada mejorada.
       </p>
 
-      <button className="mt-6 rounded-full bg-yellow-400 px-6 py-3 font-semibold text-yellow-900 shadow-md transition hover:scale-105">
-        Próximamente
-      </button>
+      <button
+  disabled
+  className="mt-6 cursor-not-allowed rounded-full bg-yellow-300 px-6 py-3 font-semibold text-yellow-900 opacity-80 shadow-md"
+>
+  Próximamente
+</button>
     </div>
   </div>
 ) : (
@@ -197,7 +200,7 @@ export default function RouteDetailPage() {
                 key={point.id}
                 className="flex items-center gap-4 rounded-3xl bg-white p-4 shadow-md"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500 text-white font-bold shadow-md">
                   {index + 1}
                 </div>
 
