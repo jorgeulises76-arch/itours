@@ -101,14 +101,14 @@ useEffect(() => {
     setLastSpokenPointIndex(currentPoint.index)
   }
 
-  if (currentPoint.index >= routeProgressIndex) {
-    const nextIndex = Math.min(
-      currentPoint.index + 1,
-      sortedPoints.length - 1
-    )
+  if (currentPoint.index === routeProgressIndex) {
+  const nextIndex = Math.min(
+    currentPoint.index + 1,
+    sortedPoints.length - 1
+  )
 
-    setRouteProgressIndex(nextIndex)
-  }
+  setRouteProgressIndex(nextIndex)
+}
 }, [
   currentPoint,
   lastSpokenPointIndex,
