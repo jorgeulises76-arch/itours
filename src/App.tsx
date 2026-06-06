@@ -7,16 +7,14 @@ import BottomNav from './components/BottomNav'
 function App() {
   return (
   <BrowserRouter>
-    <div className="min-h-screen bg-gray-200 md:flex md:justify-center">
-      <div className="min-h-screen w-full bg-gray-100 pb-24 shadow-2xl md:max-w-md">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/city/:id" element={<CityRoutesPage />} />
-          <Route path="/route/:id" element={<RouteDetailPage />} />
-        </Routes>
+    <div className="pb-24">
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/city/:id" element={<CityRoutesPage />} />
+        <Route path="/route/:id" element={<RouteDetailPage />} />
+      </Routes>
 
-        <BottomNav />
-      </div>
+      <BottomNav />
     </div>
   </BrowserRouter>
 )
