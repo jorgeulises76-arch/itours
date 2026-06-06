@@ -12,7 +12,7 @@ export default function BottomNav() {
   ]
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] border-t border-gray-200 bg-white/95 backdrop-blur-md">
+    <div className="fixed bottom-0 left-1/2 z-[9999] w-full max-w-md -translate-x-1/2 border-t border-gray-200 bg-white/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-md items-center justify-around py-3">
         {navItems.map((item, index) => {
           const Icon = item.icon
