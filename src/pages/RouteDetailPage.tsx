@@ -30,6 +30,10 @@ export default function RouteDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const TEST_PREMIUM_CODE = 'ITOURS2026'
+  const [unlockCode, setUnlockCode] = useState('')
+  const [isPremiumUnlocked, setIsPremiumUnlocked] = useState(false)
+
   useEffect(() => {
     const fetchRoute = async () => {
       if (!id) {
@@ -40,7 +44,9 @@ export default function RouteDetailPage() {
 
       const { data, error } = await supabase
         .from('routes')
-        .select('id, title, description, duration_estimated, distance_km, city_id, is_premium')
+        .select(
+          'id, title, description, duration_estimated, distance_km, city_id, is_premium'
+        )
         .eq('id', id)
         .single()
 
@@ -69,6 +75,34 @@ export default function RouteDetailPage() {
 
     fetchRoute()
   }, [id])
+
+  useEffect(() => {
+    if (!id) return
+
+    const unlockedRoutes = JSON.parse(
+      localStorage.getItem('unlockedPremiumRoutes') || '[]'
+    )
+
+    setIsPremiumUnlocked(unlockedRoutes.includes(id))
+  }, [id])
+
+  function unlockPremiumRoute() {
+    if (!id) return
+
+    if (unlockCode.trim().toUpperCase() !== TEST_PREMIUM_CODE) {
+      alert('Código incorrecto')
+      return
+    }
+
+    const unlockedRoutes = JSON.parse(
+      localStorage.getItem('unlockedPremiumRoutes') || '[]'
+    )
+
+    const updatedRoutes = [...new Set([...unlockedRoutes, id])]
+
+    localStorage.setItem('unlockedPremiumRoutes', JSON.stringify(updatedRoutes))
+    setIsPremiumUnlocked(true)
+  }
 
   if (loading) {
     return <div className="p-6">Cargando detalle de ruta...</div>
@@ -100,16 +134,14 @@ export default function RouteDetailPage() {
           </Link>
 
           <div className="mb-3 flex items-center gap-2">
-  {route.is_premium && (
-    <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-yellow-900">
-      ⭐ PREMIUM
-    </span>
-  )}
+            {route.is_premium && (
+              <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-yellow-900">
+                ⭐ PREMIUM
+              </span>
+            )}
 
-  <span className="text-sm text-gray-200">
-    Ruta guiada con GPS
-  </span>
-</div>
+            <span className="text-sm text-gray-200">Ruta guiada con GPS</span>
+          </div>
 
           <h1 className="text-4xl font-extrabold leading-tight">
             {route.title || 'Ruta sin título'}
@@ -150,33 +182,56 @@ export default function RouteDetailPage() {
           )}
         </div>
 
-        {route.is_premium ? (
-  <div className="rounded-3xl bg-white p-8 shadow-lg">
-    <div className="text-center">
-      <div className="mb-4 text-5xl">🔒</div>
+        {route.is_premium && !isPremiumUnlocked ? (
+          <div className="rounded-3xl bg-white p-6 shadow-lg">
+            <div className="text-center">
+              <div className="mb-4 text-5xl">🔒</div>
 
-      <h2 className="text-2xl font-bold text-gray-800">
-        Ruta Premium
-      </h2>
+              <span className="rounded-full bg-yellow-100 px-4 py-2 text-xs font-bold text-yellow-700">
+                ⭐ RUTA PREMIUM
+              </span>
 
-      <p className="mt-3 text-sm leading-relaxed text-gray-600">
-        Esta experiencia premium estará disponible próximamente en iTours.
-        Incluye navegación completa, contenido ampliado y una experiencia guiada mejorada.
-      </p>
+              <h2 className="mt-5 text-2xl font-bold text-gray-800">
+                Desbloquea esta experiencia
+              </h2>
 
-      <button
-  disabled
-  className="mt-6 cursor-not-allowed rounded-full bg-yellow-300 px-6 py-3 font-semibold text-yellow-900 opacity-80 shadow-md"
->
-  Próximamente
-</button>
-    </div>
-  </div>
-) : (
-  <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
-    <RouteMap points={points} />
-  </div>
-)}
+              <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                Accede a una ruta guiada completa con contenido exclusivo,
+                navegación GPS y una experiencia pensada para descubrir la
+                ciudad a tu ritmo.
+              </p>
+
+              <p className="mt-5 text-3xl font-extrabold text-gray-800">7 €</p>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Acceso completo a esta ruta premium
+              </p>
+
+              <input
+                value={unlockCode}
+                onChange={(e) => setUnlockCode(e.target.value)}
+                placeholder="Introduce tu código de acceso"
+                className="mt-6 w-full rounded-2xl border border-gray-200 px-4 py-3 text-center text-sm outline-none focus:border-yellow-400"
+              />
+
+              <button
+                onClick={unlockPremiumRoute}
+                className="mt-4 w-full rounded-full bg-yellow-400 px-6 py-3 font-semibold text-yellow-900 shadow-md transition hover:scale-105"
+              >
+                Desbloquear ruta
+              </button>
+
+              <p className="mt-4 text-xs leading-relaxed text-gray-400">
+                ¿No tienes código? La compra de rutas premium estará disponible
+                próximamente.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
+            <RouteMap points={points} />
+          </div>
+        )}
 
         <div className="mt-6">
           <div className="mb-4 flex items-center gap-3">
