@@ -1,8 +1,7 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useEffect, useState } from 'react'
-import 'leaflet-routing-machine'
-import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
+
 
 type Point = {
   id: string
@@ -22,7 +21,9 @@ export default function RouteMap({ points }: RouteMapProps) {
   const [accuracy, setAccuracy] = useState<number | null>(null)
   const [routeProgressIndex, setRouteProgressIndex] = useState(0)
   const [lastSpokenPointIndex, setLastSpokenPointIndex] = useState<number | null>(null)
-  useEffect(() => {
+  const [arrivedPointIndex, setArrivedPointIndex] = useState<number | null>(null)
+
+useEffect(() => {
   const watchId = navigator.geolocation.watchPosition(
     (position) => {
   setUserPosition([
@@ -83,9 +84,25 @@ if (userPosition && sortedPoints.length > 0) {
   )
 }
 
+const targetRoutePoint = sortedPoints[routeProgressIndex] || null
+
+const distanceToTargetPoint =
+  userPosition && targetRoutePoint
+    ? getDistance(
+        userPosition[0],
+        userPosition[1],
+        targetRoutePoint.latitude,
+        targetRoutePoint.longitude
+      )
+    : null
+
 const currentPoint =
-  nearestPoint && nearestPoint.distance <= 0.02
-    ? nearestPoint
+  targetRoutePoint && distanceToTargetPoint !== null && distanceToTargetPoint <= 0.04
+    ? {
+        point: targetRoutePoint,
+        index: routeProgressIndex,
+        distance: distanceToTargetPoint,
+      }
     : null
 
 useEffect(() => {
@@ -102,12 +119,7 @@ useEffect(() => {
   }
 
   if (currentPoint.index === routeProgressIndex) {
-  const nextIndex = Math.min(
-    currentPoint.index + 1,
-    sortedPoints.length - 1
-  )
-
-  setRouteProgressIndex(nextIndex)
+  setArrivedPointIndex(currentPoint.index)
 }
 }, [
   currentPoint,
@@ -115,7 +127,17 @@ useEffect(() => {
   routeProgressIndex,
   sortedPoints.length,
 ])
+function continueToNextPoint() {
+  if (arrivedPointIndex === null) return
 
+  const nextIndex = Math.min(
+    arrivedPointIndex + 1,
+    sortedPoints.length - 1
+  )
+
+  setRouteProgressIndex(nextIndex)
+  setArrivedPointIndex(null)
+}
 const isLastPoint =
   currentPoint !== null && currentPoint.index === sortedPoints.length - 1
 
@@ -159,11 +181,7 @@ const navigationText = shouldGuideToStart
     sortedPoints[0].longitude,
   ]
 
-  const polylinePositions: [number, number][] = sortedPoints.map((point) => [
-    point.latitude,
-    point.longitude,
-  ])
-
+  
   function getDistance(
   lat1: number,
   lon1: number,
@@ -218,47 +236,7 @@ function speak(text: string) {
   window.speechSynthesis.speak(utterance)
 }
 
-function RoutingToNextPoint({
-  userPosition,
-  nextPoint,
-}: {
-  userPosition: [number, number] | null
-  nextPoint:
-    | {
-        point: Point
-        index: number
-        distance: number
-      }
-    | null
-}) {
-  const map = useMap()
 
-  useEffect(() => {
-    if (!userPosition || !nextPoint) return
-
-    const routingControl = L.Routing.control({
-  router: L.Routing.osrmv1({
-    serviceUrl: 'https://router.project-osrm.org/route/v1',
-    profile: 'foot',
-  }),
-
-  waypoints: [
-    L.latLng(userPosition[0], userPosition[1]),
-    L.latLng(nextPoint.point.latitude, nextPoint.point.longitude),
-  ],
-  routeWhileDragging: false,
-  show: false,
-  addWaypoints: false,
-  fitSelectedRoutes: false,
-}).addTo(map)
-
-    return () => {
-      map.removeControl(routingControl)
-    }
-  }, [map, userPosition, nextPoint])
-
-  return null
-}
 function RecenterMap({ position }: { position: [number, number] | null }) {
   const map = useMap()
 
@@ -394,7 +372,14 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     </a>
   </div>
 )}
-
+{arrivedPointIndex !== null && !isLastPoint && (
+  <button
+    onClick={continueToNextPoint}
+    className="mt-4 w-full rounded-full bg-teal-500 px-6 py-3 font-semibold text-white shadow-md"
+  >
+    ✓ Continuar recorrido
+  </button>
+)}
     {nextPoint && !isLastPoint && (
   <div className="mt-4 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-purple-800">
     <p className="text-lg font-semibold">
@@ -410,8 +395,13 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   rel="noopener noreferrer"
   className="mt-3 inline-block rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
 >
-  🧭 Iniciar navegación
+  🚶 Continuar ruta
 </a>
+
+<p className="mt-2 text-center text-xs text-gray-500">
+  Disfruta del paseo. Al llegar al siguiente lugar, iTours te contará su historia.
+</p>
+
   </div>
 )}
   </div>
