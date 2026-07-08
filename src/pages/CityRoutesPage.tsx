@@ -152,20 +152,41 @@ export default function CityRoutesPage() {
                   )}
 
                   <div className="mt-5 flex items-center gap-4 text-sm text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <Clock size={16} />
-                      A tu ritmo
-                    </span>
+  <span className="flex items-center gap-1">
+    <Clock size={16} />
+    A tu ritmo
+  </span>
 
-                    <span className="flex items-center gap-1">
-                      <MapPin size={16} />
-                      Con GPS
-                    </span>
-                  </div>
+  <span className="flex items-center gap-1">
+    <MapPin size={16} />
+    Con GPS
+  </span>
+</div>
 
-                  <div className="mt-5 rounded-full bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white shadow-md transition group-hover:bg-blue-700">
-                    Empezar ruta
-                  </div>
+{route.is_premium && (
+  <div className="mt-4 rounded-2xl border border-yellow-200 bg-yellow-50 p-4">
+    <p className="font-semibold text-yellow-900">
+      ⭐ Experiencia Premium
+    </p>
+
+    <div className="mt-3 space-y-1 text-sm text-yellow-800">
+      <p>🎧 Audioguía completa</p>
+      <p>📍 Navegación GPS paso a paso</p>
+      <p>💡 Curiosidades e historias</p>
+      <p>💶 Acceso por solo 7 €</p>
+    </div>
+  </div>
+)}
+
+<div
+  className={`mt-5 rounded-full px-5 py-3 text-center text-sm font-semibold shadow-md transition ${
+    route.is_premium
+      ? 'bg-yellow-400 text-yellow-900 group-hover:bg-yellow-500'
+      : 'bg-blue-600 text-white group-hover:bg-blue-700'
+  }`}
+>
+  {route.is_premium ? '✨ Descubrir experiencia' : 'Empezar ruta'}
+</div>
                 </div>
               </Link>
             ))}
