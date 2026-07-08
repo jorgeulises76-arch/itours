@@ -188,15 +188,15 @@ export default function RouteDetailPage() {
           </div>
 
           {route.is_premium && !isPremiumUnlocked && (
-          <div className="rounded-3xl bg-white p-6 shadow-lg">
+          <div className="rounded-3xl bg-white p-8 shadow-lg">
             <div className="text-center">
-              <div className="mb-4 text-5xl">🔒</div>
+              
 
               <span className="rounded-full bg-yellow-100 px-4 py-2 text-xs font-bold text-yellow-700">
                 ⭐ RUTA PREMIUM
               </span>
 
-              <h2 className="mt-5 text-2xl font-bold text-gray-800">
+              <h2 className="mt-6 text-2xl font-bold text-gray-800">
   ✨ Todo listo para empezar
 </h2>
 
@@ -228,8 +228,7 @@ export default function RouteDetailPage() {
               </button>
 
               <p className="mt-4 text-xs leading-relaxed text-gray-400">
-                ¿No tienes código? La compra de rutas premium estará disponible
-                próximamente.
+                Próximamente podrás desbloquear esta experiencia directamente desde iTours.
               </p>
             </div>
           </div>
