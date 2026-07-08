@@ -18,6 +18,7 @@ type RouteData = {
 type RoutePoint = {
   id: string
   name: string | null
+  description: string | null
   latitude: number
   longitude: number
   order_number: number
@@ -182,7 +183,11 @@ export default function RouteDetailPage() {
           )}
         </div>
 
-        {route.is_premium && !isPremiumUnlocked ? (
+        <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
+            <RouteMap points={points} />
+          </div>
+
+          {route.is_premium && !isPremiumUnlocked && (
           <div className="rounded-3xl bg-white p-6 shadow-lg">
             <div className="text-center">
               <div className="mb-4 text-5xl">🔒</div>
@@ -192,25 +197,26 @@ export default function RouteDetailPage() {
               </span>
 
               <h2 className="mt-5 text-2xl font-bold text-gray-800">
-                Desbloquea esta experiencia
-              </h2>
+  ✨ Todo listo para empezar
+</h2>
 
               <p className="mt-3 text-sm leading-relaxed text-gray-600">
-                Accede a una ruta guiada completa con contenido exclusivo,
-                navegación GPS y una experiencia pensada para descubrir la
-                ciudad a tu ritmo.
-              </p>
+  Ya conoces el recorrido y todo lo que vas a descubrir.
+  <br /><br />
+  Cuando quieras vivir esta experiencia con audioguía, historias
+  y navegación GPS paso a paso, podrás acceder a ella desde aquí.
+</p>
 
               <p className="mt-5 text-3xl font-extrabold text-gray-800">7 €</p>
 
               <p className="mt-1 text-sm text-gray-500">
-                Acceso completo a esta ruta premium
-              </p>
+  Acceso completo a esta experiencia
+</p>
 
               <input
                 value={unlockCode}
                 onChange={(e) => setUnlockCode(e.target.value)}
-                placeholder="Introduce tu código de acceso"
+                placeholder="Código de acceso (solo pruebas)"
                 className="mt-6 w-full rounded-2xl border border-gray-200 px-4 py-3 text-center text-sm outline-none focus:border-yellow-400"
               />
 
@@ -218,7 +224,7 @@ export default function RouteDetailPage() {
                 onClick={unlockPremiumRoute}
                 className="mt-4 w-full rounded-full bg-yellow-400 px-6 py-3 font-semibold text-yellow-900 shadow-md transition hover:scale-105"
               >
-                Desbloquear ruta
+                ✨ Comenzar esta experiencia
               </button>
 
               <p className="mt-4 text-xs leading-relaxed text-gray-400">
@@ -227,12 +233,9 @@ export default function RouteDetailPage() {
               </p>
             </div>
           </div>
-        ) : (
-          <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
-            <RouteMap points={points} />
-          </div>
-        )}
-
+          )}
+        
+                  
         <div className="mt-6">
           <div className="mb-4 flex items-center gap-3">
             <div className="rounded-full bg-blue-100 p-3 text-blue-600">

@@ -137,7 +137,7 @@ export default function CityRoutesPage() {
       : 'bg-gray-100 text-gray-600'
   }`}
 >
-  {route.is_premium ? '⭐ Premium' : 'Ruta guiada'}
+  {route.is_premium ? '✨ Experiencia exclusiva' : '🆓 Experiencia gratuita'}
 </span>
                   </div>
 
@@ -165,17 +165,22 @@ export default function CityRoutesPage() {
 
 {route.is_premium && (
   <div className="mt-4 rounded-2xl border border-yellow-200 bg-yellow-50 p-4">
-    <p className="font-semibold text-yellow-900">
-      ⭐ Experiencia Premium
-    </p>
+  <p className="font-semibold text-yellow-900">
+    ✨ Una experiencia para descubrir la ciudad
+  </p>
 
-    <div className="mt-3 space-y-1 text-sm text-yellow-800">
-      <p>🎧 Audioguía completa</p>
-      <p>📍 Navegación GPS paso a paso</p>
-      <p>💡 Curiosidades e historias</p>
-      <p>💶 Acceso por solo 7 €</p>
-    </div>
+  <p className="mt-2 text-sm leading-relaxed text-yellow-800">
+    Déjate guiar por las obras más emblemáticas mientras descubres las
+    historias y curiosidades que hacen único cada lugar.
+  </p>
+
+  <div className="mt-4 space-y-2 text-sm text-yellow-800">
+    <p>🎧 Audioguía durante todo el recorrido</p>
+    <p>📍 Navegación GPS paso a paso</p>
+    <p>🏛️ Lugares imprescindibles</p>
+    <p>💶 Acceso por 7 €</p>
   </div>
+</div>
 )}
 
 <div
@@ -185,7 +190,7 @@ export default function CityRoutesPage() {
       : 'bg-blue-600 text-white group-hover:bg-blue-700'
   }`}
 >
-  {route.is_premium ? '✨ Descubrir experiencia' : 'Empezar ruta'}
+  {route.is_premium ? '✨ Descubrir esta experiencia' : 'Empezar ruta'}
 </div>
                 </div>
               </Link>
