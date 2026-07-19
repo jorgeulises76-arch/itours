@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { MapPin } from 'lucide-react'
 import { supabase } from '../services/supabaseClient'
 import molletImage from '../assets/Mollet.jpeg'
+import parisRuta1Image from '../assets/paris-ruta1.jpg'
 
 type City = {
   id: string
@@ -88,14 +89,16 @@ export default function HomePage() {
             >
               <div className="h-40 overflow-hidden">
                 <img
-                  src={
-                    city.name === 'Barcelona'
-                      ? 'https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?q=80&w=1200&auto=format&fit=crop'
-                      : molletImage
-                  }
-                  alt={city.name}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                />
+  src={
+    city.name === 'Barcelona'
+      ? 'https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?q=80&w=1200&auto=format&fit=crop'
+      : city.name === 'París'
+        ? parisRuta1Image
+        : molletImage
+  }
+  alt={city.name}
+  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+/>
               </div>
 
               <div className="flex items-center justify-between p-5">

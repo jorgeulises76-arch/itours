@@ -4,6 +4,8 @@ import { ArrowLeft, Clock, MapPin, ListOrdered } from 'lucide-react'
 import { supabase } from '../services/supabaseClient'
 import RouteMap from '../components/RouteMap'
 import molletImage from '../assets/Mollet.jpg'
+import parisRuta1Image from '../assets/paris-ruta1.jpg'
+
 
 type RouteData = {
   id: string
@@ -117,13 +119,21 @@ export default function RouteDetailPage() {
     return <div className="p-6">Ruta no encontrada</div>
   }
 
+  const routeImage =
+  route.city_id === '7c33ef71-1361-48ef-83ca-9ed66aaac565'
+    ? parisRuta1Image
+    : molletImage
+
   return (
     <div className="min-h-screen bg-gray-100">
-      <div
-        className="relative h-64 bg-cover bg-center"
-        style={{ backgroundImage: `url(${molletImage})` }}
-      >
-        <div className="absolute inset-0 bg-black/45" />
+      <div className="relative h-64 overflow-hidden">
+  <img
+    src={routeImage}
+    alt={route.title || 'Ruta'}
+    className="absolute inset-0 h-full w-full object-cover"
+  />
+
+  <div className="absolute inset-0 bg-black/45" />
 
         <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-8 text-white">
           <Link

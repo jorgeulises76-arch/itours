@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, MapPin, Clock, Route as RouteIcon } from 'lucide-react'
 import { supabase } from '../services/supabaseClient'
 import molletImage from '../assets/Mollet.jpg'
+import parisRuta1Image from '../assets/paris-ruta1.jpg'
 
 type City = {
   id: string
@@ -67,17 +68,22 @@ export default function CityRoutesPage() {
   }
 
   const heroImage =
-    city?.name === 'Mollet del Vallès'
+  city?.id === '7c33ef71-1361-48ef-83ca-9ed66aaac565'
+    ? parisRuta1Image
+    : city?.name === 'Mollet del Vallès'
       ? molletImage
       : 'https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?q=80&w=1600&auto=format&fit=crop'
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div
-        className="relative h-64 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImage})` }}
-      >
-        <div className="absolute inset-0 bg-black/45" />
+      <div className="relative h-64 overflow-hidden">
+  <img
+    src={heroImage}
+    alt={city?.name || 'Ciudad'}
+    className="absolute inset-0 h-full w-full object-cover"
+  />
+
+  <div className="absolute inset-0 bg-black/45" />
 
         <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-8 text-white">
           <Link
