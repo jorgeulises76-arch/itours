@@ -30,6 +30,8 @@ export default function RouteDetailPage() {
   const { id } = useParams()
   const [route, setRoute] = useState<RouteData | null>(null)
   const [points, setPoints] = useState<RoutePoint[]>([])
+  const [selectedPoint, setSelectedPoint] = useState<RoutePoint | null>(null)
+  console.log('SELECTED POINT:', selectedPoint)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -106,6 +108,27 @@ export default function RouteDetailPage() {
     localStorage.setItem('unlockedPremiumRoutes', JSON.stringify(updatedRoutes))
     setIsPremiumUnlocked(true)
   }
+  function speak(text: string) {
+  if (!('speechSynthesis' in window)) {
+    alert('Este dispositivo no permite reproducción de voz.')
+    return
+  }
+
+  window.speechSynthesis.cancel()
+
+  const utterance = new SpeechSynthesisUtterance(text)
+
+  utterance.lang = 'es-ES'
+  utterance.rate = 0.95
+  utterance.pitch = 1
+  utterance.volume = 1
+
+  utterance.onerror = (event) => {
+    console.log('Error de voz:', event)
+  }
+
+  window.speechSynthesis.speak(utterance)
+}
 
   if (loading) {
     return <div className="p-6">Cargando detalle de ruta...</div>
@@ -263,24 +286,61 @@ export default function RouteDetailPage() {
 
           <div className="space-y-3">
             {points.map((point, index) => (
-              <div
-                key={point.id}
-                className="flex items-center gap-4 rounded-3xl bg-white p-4 shadow-md"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500 text-white font-bold shadow-md">
-                  {index + 1}
-                </div>
+  <div key={point.id}>
+    <div
+      onClick={() =>
+        setSelectedPoint(selectedPoint?.id === point.id ? null : point)
+      }
+      className="flex cursor-pointer items-center gap-4 rounded-3xl bg-white p-4 shadow-md transition active:scale-[0.98]"
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-500 font-bold text-white shadow-md">
+        {index + 1}
+      </div>
 
-                <div>
-                  <p className="font-semibold text-gray-800">
-                    {point.name || `Punto ${index + 1}`}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Parada del recorrido
-                  </p>
-                </div>
-              </div>
-            ))}
+      <div className="flex-1">
+        <p className="font-semibold text-gray-800">
+          {point.name || `Punto ${index + 1}`}
+        </p>
+
+        <p className="text-sm text-gray-500">
+          Toca para descubrir este punto
+        </p>
+      </div>
+
+      <span className="text-gray-400">
+        {selectedPoint?.id === point.id ? '▲' : '▼'}
+      </span>
+    </div>
+
+    {selectedPoint?.id === point.id && (
+  <div className="mx-2 rounded-b-3xl bg-white px-5 pb-5 pt-3 shadow-md">
+    {point.description ? (
+      <>
+        <p className="text-sm leading-relaxed text-gray-600">
+          {point.description}
+        </p>
+
+        <button
+  type="button"
+  onClick={(e) => {
+    e.stopPropagation()
+    speak(point.description!)
+  }}
+  className="relative z-50 mt-4 cursor-pointer rounded-full bg-teal-500 px-6 py-3 text-sm font-semibold text-white shadow-md pointer-events-auto"
+>
+  🔊 Escuchar descripción
+</button>
+      </>
+    ) : (
+      <p className="text-sm italic text-gray-400">
+        Sin descripción disponible.
+      </p>
+    )}
+  </div>
+)}
+  </div>
+))}
+           
           </div>
         </div>
       </div>
