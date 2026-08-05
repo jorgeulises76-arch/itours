@@ -174,7 +174,10 @@ const navigationText = shouldGuideToStart
   : `Continuar al punto ${routeProgressIndex + 1}`
 
   const isNearestPointIntermediate =
-  nearestPoint !== null && nearestPoint.index > 0 && !currentPoint
+  routeProgressIndex === 0 &&
+  nearestPoint !== null &&
+  nearestPoint.index > 0 &&
+  !currentPoint
 
   const center: [number, number] = [
     sortedPoints[0].latitude,
@@ -313,6 +316,10 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   href={`https://www.google.com/maps/dir/?api=1&destination=${nearestPoint.point.latitude},${nearestPoint.point.longitude}&travelmode=walking`}
   target="_blank"
   rel="noopener noreferrer"
+  onClick={() => {
+    setRouteProgressIndex(nearestPoint.index)
+    setArrivedPointIndex(null)
+  }}
   className="rounded-xl bg-green-600 px-3 py-2 text-white"
 >
   📍 Empezar desde aquí
