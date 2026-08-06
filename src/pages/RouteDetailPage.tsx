@@ -141,6 +141,8 @@ export default function RouteDetailPage() {
   if (!route) {
     return <div className="p-6">Ruta no encontrada</div>
   }
+  const canAccessContent =
+  !route.is_premium || isPremiumUnlocked
 
   const routeImage =
   route.city_id === '7c33ef71-1361-48ef-83ca-9ed66aaac565'
@@ -314,27 +316,33 @@ export default function RouteDetailPage() {
 
     {selectedPoint?.id === point.id && (
   <div className="mx-2 rounded-b-3xl bg-white px-5 pb-5 pt-3 shadow-md">
-    {point.description ? (
-      <>
-        <p className="text-sm leading-relaxed text-gray-600">
-          {point.description}
-        </p>
+    {canAccessContent ? (
+      point.description ? (
+        <>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              speak(point.description!)
+            }}
+            className="relative z-50 mb-4 cursor-pointer rounded-full bg-teal-500 px-6 py-3 text-sm font-semibold text-white shadow-md pointer-events-auto"
+          >
+            🔊 Escuchar descripción
+          </button>
 
-        <button
-  type="button"
-  onClick={(e) => {
-    e.stopPropagation()
-    speak(point.description!)
-  }}
-  className="relative z-50 mt-4 cursor-pointer rounded-full bg-teal-500 px-6 py-3 text-sm font-semibold text-white shadow-md pointer-events-auto"
->
-  🔊 Escuchar descripción
-</button>
-      </>
+          <p className="text-sm leading-relaxed text-gray-600">
+            {point.description}
+          </p>
+        </>
+      ) : (
+        <p className="text-sm italic text-gray-400">
+          Sin descripción disponible.
+        </p>
+      )
     ) : (
-      <p className="text-sm italic text-gray-400">
-        Sin descripción disponible.
-      </p>
+      <div className="rounded-2xl bg-yellow-50 p-4 text-sm text-yellow-800">
+        🔒 Desbloquea esta ruta para acceder a la descripción y al audio.
+      </div>
     )}
   </div>
 )}
