@@ -14,14 +14,26 @@ type Point = {
 
 type RouteMapProps = {
   points: Point[]
+  routeId: string
 }
 
-export default function RouteMap({ points }: RouteMapProps) {
+export default function RouteMap({ points, routeId }: RouteMapProps) {
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
-  const [routeProgressIndex, setRouteProgressIndex] = useState(0)
+  const [routeProgressIndex, setRouteProgressIndex] = useState(() => {
+  const savedProgress = localStorage.getItem(`itours-route-progress-${routeId}`)
+
+  return savedProgress ? Number(savedProgress) : 0
+})
   const [lastSpokenPointIndex, setLastSpokenPointIndex] = useState<number | null>(null)
   const [arrivedPointIndex, setArrivedPointIndex] = useState<number | null>(null)
+
+useEffect(() => {
+  localStorage.setItem(
+    `itours-route-progress-${routeId}`,
+    String(routeProgressIndex)
+  )
+}, [routeId, routeProgressIndex])
 
 useEffect(() => {
   const watchId = navigator.geolocation.watchPosition(

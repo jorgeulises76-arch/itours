@@ -219,7 +219,7 @@ export default function RouteDetailPage() {
         </div>
 
         <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
-            <RouteMap points={points} />
+            <RouteMap points={points} routeId={route.id} />
           </div>
 
           {route.is_premium && !isPremiumUnlocked && (
