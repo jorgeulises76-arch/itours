@@ -21,19 +21,58 @@ export default function RouteMap({ points, routeId }: RouteMapProps) {
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
   const [routeProgressIndex, setRouteProgressIndex] = useState(() => {
-  const savedProgress = localStorage.getItem(`itours-route-progress-${routeId}`)
+  const savedProgress = localStorage.getItem(
+    `itours-v2-route-progress-${routeId}`
+  )
 
-  return savedProgress ? Number(savedProgress) : 0
+  const savedLastCompleted = localStorage.getItem(
+    `itours-v2-route-last-completed-${routeId}`
+  )
+
+  const progressIndex = savedProgress !== null
+    ? Number(savedProgress)
+    : 0
+
+  if (savedLastCompleted !== null) {
+    const lastCompletedIndex = Number(savedLastCompleted)
+    const nextIndex = lastCompletedIndex + 1
+
+    if (nextIndex < points.length) {
+      return Math.max(progressIndex, nextIndex)
+    }
+  }
+
+  return progressIndex
 })
   const [lastSpokenPointIndex, setLastSpokenPointIndex] = useState<number | null>(null)
   const [arrivedPointIndex, setArrivedPointIndex] = useState<number | null>(null)
+  
+  const [lastCompletedPointIndex, setLastCompletedPointIndex] =
+  useState<number | null>(() => {
+    const savedLastCompleted = localStorage.getItem(
+      `itours-v2-route-last-completed-${routeId}`
+    )
+
+    return savedLastCompleted !== null
+      ? Number(savedLastCompleted)
+      : null
+  })
 
 useEffect(() => {
   localStorage.setItem(
-    `itours-route-progress-${routeId}`,
+    `itours-v2-route-progress-${routeId}`,
     String(routeProgressIndex)
   )
 }, [routeId, routeProgressIndex])
+
+useEffect(() => {
+  if (lastCompletedPointIndex === null) return
+
+  localStorage.setItem(
+    `itours-v2-route-last-completed-${routeId}`,
+    String(lastCompletedPointIndex)
+  )
+}, [routeId, lastCompletedPointIndex])
 
 useEffect(() => {
   const watchId = navigator.geolocation.watchPosition(
@@ -60,6 +99,7 @@ useEffect(() => {
   const sortedPoints = [...points].sort(
     (a, b) => a.order_number - b.order_number
   )
+  
 
   let distanceToStart: number | null = null
 
@@ -126,22 +166,18 @@ useEffect(() => {
         currentPoint.point.name || `el punto ${currentPoint.index + 1}`
       }`
     )
-
     setLastSpokenPointIndex(currentPoint.index)
   }
 
   if (currentPoint.index === routeProgressIndex) {
-  setArrivedPointIndex(currentPoint.index)
-}
-}, [
-  currentPoint,
-  lastSpokenPointIndex,
-  routeProgressIndex,
-  sortedPoints.length,
-])
+    setArrivedPointIndex(currentPoint.index)
+    setLastCompletedPointIndex(currentPoint.index)
+  }
+}, [currentPoint, lastSpokenPointIndex, routeProgressIndex, sortedPoints.length])
 function continueToNextPoint() {
   if (arrivedPointIndex === null) return
 
+  
   const nextIndex = Math.min(
     arrivedPointIndex + 1,
     sortedPoints.length - 1
@@ -151,7 +187,11 @@ function continueToNextPoint() {
   setArrivedPointIndex(null)
 }
 const isLastPoint =
-  currentPoint !== null && currentPoint.index === sortedPoints.length - 1
+  currentPoint !== null &&
+  currentPoint.index === sortedPoints.length - 1
+
+const isRouteCompleted =
+  lastCompletedPointIndex === sortedPoints.length - 1
 
 let nextPoint: typeof nearestPoint = null
 
@@ -272,6 +312,38 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   return (
     <div className="mt-6 space-y-4">
       <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
+      {lastCompletedPointIndex !== null &&
+  !currentPoint &&
+  sortedPoints[lastCompletedPointIndex] && (
+    <div className="rounded-2xl border border-teal-200 bg-teal-50 p-4 text-teal-800">
+      <p className="font-semibold">
+        ✓ Último punto completado:{' '}
+        {sortedPoints[lastCompletedPointIndex].name ||
+          `Punto ${lastCompletedPointIndex + 1}`}
+      </p>
+
+      {sortedPoints[routeProgressIndex] && (
+        <>
+          <p className="mt-2 text-sm">
+            Siguiente parada:{' '}
+            <strong>
+              {sortedPoints[routeProgressIndex].name ||
+                `Punto ${routeProgressIndex + 1}`}
+            </strong>
+          </p>
+
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${sortedPoints[routeProgressIndex].latitude},${sortedPoints[routeProgressIndex].longitude}&travelmode=walking`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-block rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white"
+          >
+            🧭 Ir a la siguiente parada
+          </a>
+        </>
+      )}
+    </div>
+  )}
 {routeProgressIndex === 0 &&
   distanceToStart !== null &&
   distanceStatus &&
@@ -302,7 +374,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   </div>
 )}
 
-{nearestPoint && !currentPoint && (
+{routeProgressIndex === 0 && nearestPoint && !currentPoint && (
   <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-800">
 
     <p className="text-lg font-semibold">
@@ -377,7 +449,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     (Sin descripción)
   </p>
 )}
-{isLastPoint && (
+{(isLastPoint || isRouteCompleted) && (
   <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-800">
     <p className="text-lg font-semibold">
       🎉 Has llegado al final de la ruta
