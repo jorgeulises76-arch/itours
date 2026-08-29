@@ -109,7 +109,7 @@ const distanceToTargetPoint =
     : null
 
 const currentPoint =
-  targetRoutePoint && distanceToTargetPoint !== null && distanceToTargetPoint <= 0.04
+  targetRoutePoint && distanceToTargetPoint !== null && distanceToTargetPoint <= 0.02
     ? {
         point: targetRoutePoint,
         index: routeProgressIndex,
@@ -156,20 +156,26 @@ const isLastPoint =
 let nextPoint: typeof nearestPoint = null
 
 if (userPosition && sortedPoints.length > 0 && !isLastPoint) {
-  const pointToNavigate = sortedPoints[routeProgressIndex]
+  const nextPointIndex =
+    currentPoint !== null
+      ? routeProgressIndex + 1
+      : routeProgressIndex
 
-  nextPoint = {
-    point: pointToNavigate,
-    index: routeProgressIndex,
-    distance: getDistance(
-      userPosition[0],
-      userPosition[1],
-      pointToNavigate.latitude,
-      pointToNavigate.longitude
-    ),
+  const pointToNavigate = sortedPoints[nextPointIndex]
+
+  if (pointToNavigate) {
+    nextPoint = {
+      point: pointToNavigate,
+      index: nextPointIndex,
+      distance: getDistance(
+        userPosition[0],
+        userPosition[1],
+        pointToNavigate.latitude,
+        pointToNavigate.longitude
+      ),
+    }
   }
 }
-
 const distanceStatus = distanceToStart !== null
   ? getDistanceStatus(distanceToStart)
   : null
@@ -266,7 +272,10 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   return (
     <div className="mt-6 space-y-4">
       <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
-{distanceToStart !== null && distanceStatus && !currentPoint && (
+{routeProgressIndex === 0 &&
+  distanceToStart !== null &&
+  distanceStatus &&
+  !currentPoint && (
   <div
   className={`mt-4 rounded-3xl border p-5 shadow-md backdrop-blur-sm ${distanceStatus.color}`}
 >
