@@ -313,6 +313,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     <div className="mt-6 space-y-4">
       <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
       {lastCompletedPointIndex !== null &&
+      !isRouteCompleted &&
   !currentPoint &&
   sortedPoints[lastCompletedPointIndex] && (
     <div className="rounded-2xl border border-teal-200 bg-teal-50 p-4 text-teal-800">
@@ -472,14 +473,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     </a>
   </div>
 )}
-{arrivedPointIndex !== null && !isLastPoint && (
-  <button
-    onClick={continueToNextPoint}
-    className="mt-4 w-full rounded-full bg-teal-500 px-6 py-3 font-semibold text-white shadow-md"
-  >
-    ✓ Continuar recorrido
-  </button>
-)}
+
     {nextPoint && !isLastPoint && (
   <div className="mt-4 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-purple-800">
     <p className="text-lg font-semibold">
@@ -493,9 +487,10 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   href={`https://www.google.com/maps/dir/?api=1&destination=${nextPoint.point.latitude},${nextPoint.point.longitude}&travelmode=walking`}
   target="_blank"
   rel="noopener noreferrer"
+  onClick={continueToNextPoint}
   className="mt-3 inline-block rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
 >
-  🚶 Continuar ruta
+  🧭 Ir a la siguiente parada
 </a>
 
 <p className="mt-2 text-center text-xs text-gray-500">
