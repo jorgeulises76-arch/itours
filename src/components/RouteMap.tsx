@@ -186,6 +186,19 @@ function continueToNextPoint() {
   setRouteProgressIndex(nextIndex)
   setArrivedPointIndex(null)
 }
+
+function restartRoute() {
+  localStorage.removeItem(`itours-v2-route-progress-${routeId}`)
+  localStorage.removeItem(`itours-v2-route-last-completed-${routeId}`)
+
+  setRouteProgressIndex(0)
+  setLastCompletedPointIndex(null)
+  setArrivedPointIndex(null)
+  setLastSpokenPointIndex(null)
+
+  window.speechSynthesis.cancel()
+}
+
 const isLastPoint =
   currentPoint !== null &&
   currentPoint.index === sortedPoints.length - 1
@@ -464,6 +477,13 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     <p className="mt-2 text-sm">
       Puedes volver al listado de rutas para descubrir nuevos recorridos cercanos.
     </p>
+<button
+  type="button"
+  onClick={restartRoute}
+  className="mt-4 mr-3 rounded-full bg-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-md"
+>
+  🔄 Hacer esta ruta de nuevo
+</button>
 
     <a
       href="/"
