@@ -205,6 +205,13 @@ const isLastPoint =
 
 const isRouteCompleted =
   lastCompletedPointIndex === sortedPoints.length - 1
+console.log('ROUTE DEBUG:', {
+  routeId,
+  routeProgressIndex,
+  lastCompletedPointIndex,
+  pointsLength: sortedPoints.length,
+  isRouteCompleted,
+})
 
 let nextPoint: typeof nearestPoint = null
 
@@ -525,8 +532,7 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
 
   </div>
 )}
-  </div>
-)}
+
 
       <div className="h-80 overflow-hidden rounded-2xl border shadow-sm">
         <MapContainer
