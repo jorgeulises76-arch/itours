@@ -445,25 +445,29 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     </p>
 
     {currentPoint.point.description ? (
-  <div className="mt-2 space-y-2">
-    <p className="text-sm leading-relaxed">
-      {currentPoint.point.description}
-    </p>
+      <div className="mt-2 space-y-2">
+        <p className="text-sm leading-relaxed">
+          {currentPoint.point.description}
+        </p>
 
-    <button
-  type="button"
-  onClick={() => speak(currentPoint.point.description!)}
-  className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
->
-  🔊 Escuchar descripción
-  </button>
+        <button
+          type="button"
+          onClick={() => speak(currentPoint.point.description!)}
+          className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
+        >
+          🔊 Escuchar descripción
+        </button>
+      </div>
+    ) : (
+      <p className="mt-2 text-sm italic text-gray-500">
+        (Sin descripción)
+      </p>
+    )}
+
   </div>
-) : (
-  <p className="mt-2 text-sm italic text-gray-500">
-    (Sin descripción)
-  </p>
 )}
-{(isLastPoint || isRouteCompleted) && (
+
+{isRouteCompleted && (
   <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-800">
     <p className="text-lg font-semibold">
       🎉 Has llegado al final de la ruta
@@ -477,13 +481,14 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
     <p className="mt-2 text-sm">
       Puedes volver al listado de rutas para descubrir nuevos recorridos cercanos.
     </p>
-<button
-  type="button"
-  onClick={restartRoute}
-  className="mt-4 mr-3 rounded-full bg-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-md"
->
-  🔄 Hacer esta ruta de nuevo
-</button>
+
+    <button
+      type="button"
+      onClick={restartRoute}
+      className="mt-4 mr-3 rounded-full bg-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-md"
+    >
+      🔄 Hacer esta ruta de nuevo
+    </button>
 
     <a
       href="/"
@@ -494,7 +499,8 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   </div>
 )}
 
-    {nextPoint && !isLastPoint && (
+
+    {nextPoint && !isLastPoint && !isRouteCompleted && (
   <div className="mt-4 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-purple-800">
     <p className="text-lg font-semibold">
       ➡️ Siguiente parada: {nextPoint.point.name || `Punto ${nextPoint.index + 1}`}
