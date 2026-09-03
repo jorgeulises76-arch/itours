@@ -329,43 +329,50 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
 
   return null
 }
-  return (
-    <div className="mt-6 space-y-4">
-      <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
-      {lastCompletedPointIndex !== null &&
-      !isRouteCompleted &&
-  !currentPoint &&
-  sortedPoints[lastCompletedPointIndex] && (
-    <div className="rounded-2xl border border-teal-200 bg-teal-50 p-4 text-teal-800">
-      <p className="font-semibold">
-        ✓ Último punto completado:{' '}
-        {sortedPoints[lastCompletedPointIndex].name ||
-          `Punto ${lastCompletedPointIndex + 1}`}
-      </p>
+const resumeNextPointIndex =
+  lastCompletedPointIndex !== null
+    ? Math.max(routeProgressIndex, lastCompletedPointIndex + 1)
+    : routeProgressIndex
 
-      {sortedPoints[routeProgressIndex] && (
-        <>
-          <p className="mt-2 text-sm">
-            Siguiente parada:{' '}
-            <strong>
-              {sortedPoints[routeProgressIndex].name ||
-                `Punto ${routeProgressIndex + 1}`}
-            </strong>
+return (
+  <div className="mt-6 space-y-4">
+    <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
+
+    {lastCompletedPointIndex !== null &&
+      !isRouteCompleted &&
+      !currentPoint &&
+      sortedPoints[lastCompletedPointIndex] && (
+        <div className="rounded-2xl border border-teal-200 bg-teal-50 p-4 text-teal-800">
+          <p className="font-semibold">
+            ✓ Último punto completado:{' '}
+            {sortedPoints[lastCompletedPointIndex].name ||
+              `Punto ${lastCompletedPointIndex + 1}`}
           </p>
 
-          <a
-            href={`https://www.google.com/maps/dir/?api=1&destination=${sortedPoints[routeProgressIndex].latitude},${sortedPoints[routeProgressIndex].longitude}&travelmode=walking`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-block rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white"
-          >
-            🧭 Ir a la siguiente parada
-          </a>
-        </>
+          {sortedPoints[resumeNextPointIndex] && (
+            <>
+              <p className="mt-2 text-sm">
+                Siguiente parada:{' '}
+                <strong>
+                  {sortedPoints[resumeNextPointIndex].name ||
+                    `Punto ${resumeNextPointIndex + 1}`}
+                </strong>
+              </p>
+
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${sortedPoints[resumeNextPointIndex].latitude},${sortedPoints[resumeNextPointIndex].longitude}&travelmode=walking`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-block rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white"
+              >
+                🧭 Ir a la siguiente parada
+              </a>
+            </>
+          )}
+        </div>
       )}
-    </div>
-  )}
 {routeProgressIndex === 0 &&
+  lastCompletedPointIndex === null &&
   distanceToStart !== null &&
   distanceStatus &&
   !currentPoint && (
@@ -395,7 +402,10 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
   </div>
 )}
 
-{routeProgressIndex === 0 && nearestPoint && !currentPoint && (
+{routeProgressIndex === 0 &&
+  lastCompletedPointIndex === null &&
+  nearestPoint &&
+  !currentPoint && (
   <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-800">
 
     <p className="text-lg font-semibold">
