@@ -170,22 +170,15 @@ useEffect(() => {
   }
 
   if (currentPoint.index === routeProgressIndex) {
-    setArrivedPointIndex(currentPoint.index)
-    setLastCompletedPointIndex(currentPoint.index)
+  setArrivedPointIndex(currentPoint.index)
+  setLastCompletedPointIndex(currentPoint.index)
+
+  if (currentPoint.index < sortedPoints.length - 1) {
+    setRouteProgressIndex(currentPoint.index + 1)
   }
-}, [currentPoint, lastSpokenPointIndex, routeProgressIndex, sortedPoints.length])
-function continueToNextPoint() {
-  if (arrivedPointIndex === null) return
-
-  
-  const nextIndex = Math.min(
-    arrivedPointIndex + 1,
-    sortedPoints.length - 1
-  )
-
-  setRouteProgressIndex(nextIndex)
-  setArrivedPointIndex(null)
 }
+}, [currentPoint, lastSpokenPointIndex, routeProgressIndex, sortedPoints.length])
+
 
 function restartRoute() {
   localStorage.removeItem(`itours-v2-route-progress-${routeId}`)
@@ -200,8 +193,8 @@ function restartRoute() {
 }
 
 const isLastPoint =
-  currentPoint !== null &&
-  currentPoint.index === sortedPoints.length - 1
+  arrivedPointIndex !== null &&
+  arrivedPointIndex === sortedPoints.length - 1
 
 const isRouteCompleted =
   lastCompletedPointIndex === sortedPoints.length - 1
@@ -216,10 +209,7 @@ console.log('ROUTE DEBUG:', {
 let nextPoint: typeof nearestPoint = null
 
 if (userPosition && sortedPoints.length > 0 && !isLastPoint) {
-  const nextPointIndex =
-    currentPoint !== null
-      ? routeProgressIndex + 1
-      : routeProgressIndex
+  const nextPointIndex = routeProgressIndex
 
   const pointToNavigate = sortedPoints[nextPointIndex]
 
@@ -339,6 +329,7 @@ return (
     <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
 
     {lastCompletedPointIndex !== null &&
+    arrivedPointIndex === null &&
       !isRouteCompleted &&
       !currentPoint &&
       sortedPoints[lastCompletedPointIndex] && (
@@ -454,22 +445,26 @@ return (
 
   </div>
 )}
-{currentPoint && (
+{arrivedPointIndex !== null && sortedPoints[arrivedPointIndex] && (
   <div className="mt-4 rounded-2xl border border-green-200 bg-green-50 p-4 text-green-800">
-    
+
     <p className="text-lg font-semibold">
-      ✅ Estás en: {currentPoint.point.name || `Punto ${currentPoint.index + 1}`}
+      ✅ Estás en:{' '}
+      {sortedPoints[arrivedPointIndex].name ||
+        `Punto ${arrivedPointIndex + 1}`}
     </p>
 
-    {currentPoint.point.description ? (
+    {sortedPoints[arrivedPointIndex].description ? (
       <div className="mt-2 space-y-2">
         <p className="text-sm leading-relaxed">
-          {currentPoint.point.description}
+          {sortedPoints[arrivedPointIndex].description}
         </p>
 
         <button
           type="button"
-          onClick={() => speak(currentPoint.point.description!)}
+          onClick={() =>
+            speak(sortedPoints[arrivedPointIndex].description!)
+          }
           className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
         >
           🔊 Escuchar descripción
@@ -530,7 +525,6 @@ return (
   href={`https://www.google.com/maps/dir/?api=1&destination=${nextPoint.point.latitude},${nextPoint.point.longitude}&travelmode=walking`}
   target="_blank"
   rel="noopener noreferrer"
-  onClick={continueToNextPoint}
   className="mt-3 inline-block rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
 >
   🧭 Ir a la siguiente parada
