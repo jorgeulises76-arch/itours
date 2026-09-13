@@ -20,18 +20,34 @@ type RouteMapProps = {
 export default function RouteMap({ points, routeId }: RouteMapProps) {
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
-  const [routeProgressIndex, setRouteProgressIndex] = useState(() => {
-  const savedProgress = localStorage.getItem(
-    `itours-v2-route-progress-${routeId}`
-  )
 
-  const savedLastCompleted = localStorage.getItem(
-    `itours-v2-route-last-completed-${routeId}`
-  )
+  const ROUTE_PROGRESS_EXPIRY_MS = 6 * 60 * 60 * 1000
 
-  const progressIndex = savedProgress !== null
-    ? Number(savedProgress)
-    : 0
+const [routeProgressIndex, setRouteProgressIndex] = useState(() => {
+  const progressKey = `itours-v2-route-progress-${routeId}`
+  const lastCompletedKey = `itours-v2-route-last-completed-${routeId}`
+  const lastActivityKey = `itours-v2-route-last-activity-${routeId}`
+
+  const savedProgress = localStorage.getItem(progressKey)
+  const savedLastCompleted = localStorage.getItem(lastCompletedKey)
+  const savedLastActivity = localStorage.getItem(lastActivityKey)
+
+  const isExpired =
+    savedLastActivity === null ||
+    Date.now() - Number(savedLastActivity) > ROUTE_PROGRESS_EXPIRY_MS
+
+  if (isExpired) {
+    localStorage.removeItem(progressKey)
+    localStorage.removeItem(lastCompletedKey)
+    localStorage.removeItem(lastActivityKey)
+
+    return 0
+  }
+
+  const progressIndex =
+    savedProgress !== null
+      ? Number(savedProgress)
+      : 0
 
   if (savedLastCompleted !== null) {
     const lastCompletedIndex = Number(savedLastCompleted)
@@ -63,6 +79,10 @@ useEffect(() => {
     `itours-v2-route-progress-${routeId}`,
     String(routeProgressIndex)
   )
+    localStorage.setItem(
+    `itours-v2-route-last-activity-${routeId}`,
+    String(Date.now())
+  )
 }, [routeId, routeProgressIndex])
 
 useEffect(() => {
@@ -71,6 +91,11 @@ useEffect(() => {
   localStorage.setItem(
     `itours-v2-route-last-completed-${routeId}`,
     String(lastCompletedPointIndex)
+  )
+
+  localStorage.setItem(
+    `itours-v2-route-last-activity-${routeId}`,
+    String(Date.now())
   )
 }, [routeId, lastCompletedPointIndex])
 
@@ -183,6 +208,7 @@ useEffect(() => {
 function restartRoute() {
   localStorage.removeItem(`itours-v2-route-progress-${routeId}`)
   localStorage.removeItem(`itours-v2-route-last-completed-${routeId}`)
+  localStorage.removeItem(`itours-v2-route-last-activity-${routeId}`)
 
   setRouteProgressIndex(0)
   setLastCompletedPointIndex(null)
