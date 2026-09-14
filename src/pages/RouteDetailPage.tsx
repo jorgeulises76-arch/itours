@@ -38,6 +38,7 @@ export default function RouteDetailPage() {
   const TEST_PREMIUM_CODE = 'ITOURS2026'
   const [unlockCode, setUnlockCode] = useState('')
   const [isPremiumUnlocked, setIsPremiumUnlocked] = useState(false)
+  const [isRouteStarted, setIsRouteStarted] = useState(false)
 
   useEffect(() => {
     const fetchRoute = async () => {
@@ -186,40 +187,48 @@ export default function RouteDetailPage() {
       </div>
 
       <div className="px-5 py-6">
-        {route.description && (
-          <p className="mb-5 rounded-3xl bg-white p-5 text-sm leading-relaxed text-gray-600 shadow-md">
-            {route.description}
+        {!isRouteStarted && (
+  <>
+    {route.description && (
+      <p className="mb-5 rounded-3xl bg-white p-5 text-sm leading-relaxed text-gray-600 shadow-md">
+        {route.description}
+      </p>
+    )}
+
+    <div className="mb-6 grid grid-cols-2 gap-4">
+      {route.duration_estimated !== null && (
+        <div className="rounded-3xl bg-white p-4 shadow-md">
+          <div className="mb-2 w-fit rounded-full bg-blue-100 p-2 text-blue-600">
+            <Clock size={20} />
+          </div>
+          <p className="text-xs font-medium text-gray-500">Duración</p>
+          <p className="text-lg font-bold text-gray-800">
+            {route.duration_estimated} min
           </p>
-        )}
-
-        <div className="mb-6 grid grid-cols-2 gap-4">
-          {route.duration_estimated !== null && (
-            <div className="rounded-3xl bg-white p-4 shadow-md">
-              <div className="mb-2 w-fit rounded-full bg-blue-100 p-2 text-blue-600">
-                <Clock size={20} />
-              </div>
-              <p className="text-xs font-medium text-gray-500">Duración</p>
-              <p className="text-lg font-bold text-gray-800">
-                {route.duration_estimated} min
-              </p>
-            </div>
-          )}
-
-          {route.distance_km !== null && (
-            <div className="rounded-3xl bg-white p-4 shadow-md">
-              <div className="mb-2 w-fit rounded-full bg-blue-100 p-2 text-blue-600">
-                <MapPin size={20} />
-              </div>
-              <p className="text-xs font-medium text-gray-500">Distancia</p>
-              <p className="text-lg font-bold text-gray-800">
-                {route.distance_km} km
-              </p>
-            </div>
-          )}
         </div>
+      )}
+
+      {route.distance_km !== null && (
+        <div className="rounded-3xl bg-white p-4 shadow-md">
+          <div className="mb-2 w-fit rounded-full bg-blue-100 p-2 text-blue-600">
+            <MapPin size={20} />
+          </div>
+          <p className="text-xs font-medium text-gray-500">Distancia</p>
+          <p className="text-lg font-bold text-gray-800">
+            {route.distance_km} km
+          </p>
+        </div>
+      )}
+    </div>
+  </>
+)}
 
         <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
-            <RouteMap points={points} routeId={route.id} />
+            <RouteMap
+  points={points}
+  routeId={route.id}
+  onRouteStartedChange={setIsRouteStarted}
+/>
           </div>
 
           {route.is_premium && !isPremiumUnlocked && (

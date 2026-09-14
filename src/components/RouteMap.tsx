@@ -15,9 +15,14 @@ type Point = {
 type RouteMapProps = {
   points: Point[]
   routeId: string
+  onRouteStartedChange?: (started: boolean) => void
 }
 
-export default function RouteMap({ points, routeId }: RouteMapProps) {
+export default function RouteMap({
+  points,
+  routeId,
+  onRouteStartedChange,
+}: RouteMapProps) {
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
 
@@ -98,6 +103,12 @@ useEffect(() => {
     String(Date.now())
   )
 }, [routeId, lastCompletedPointIndex])
+
+useEffect(() => {
+  const started = lastCompletedPointIndex !== null
+
+  onRouteStartedChange?.(started)
+}, [lastCompletedPointIndex, onRouteStartedChange])
 
 useEffect(() => {
   const watchId = navigator.geolocation.watchPosition(
@@ -345,6 +356,8 @@ function RecenterMap({ position }: { position: [number, number] | null }) {
 
   return null
 }
+
+
 const resumeNextPointIndex =
   lastCompletedPointIndex !== null
     ? Math.max(routeProgressIndex, lastCompletedPointIndex + 1)
@@ -422,6 +435,7 @@ return (
 {routeProgressIndex === 0 &&
   lastCompletedPointIndex === null &&
   nearestPoint &&
+  isNearestPointIntermediate &&
   !currentPoint && (
   <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-blue-800">
 
