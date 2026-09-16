@@ -16,12 +16,14 @@ type RouteMapProps = {
   points: Point[]
   routeId: string
   onRouteStartedChange?: (started: boolean) => void
+  canAccessContent: boolean
 }
 
 export default function RouteMap({
   points,
   routeId,
   onRouteStartedChange,
+  canAccessContent,
 }: RouteMapProps) {
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
@@ -494,27 +496,33 @@ return (
         `Punto ${arrivedPointIndex + 1}`}
     </p>
 
-    {sortedPoints[arrivedPointIndex].description ? (
-      <div className="mt-2 space-y-2">
-        <p className="text-sm leading-relaxed">
-          {sortedPoints[arrivedPointIndex].description}
-        </p>
-
-        <button
-          type="button"
-          onClick={() =>
-            speak(sortedPoints[arrivedPointIndex].description!)
-          }
-          className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
-        >
-          🔊 Escuchar descripción
-        </button>
-      </div>
-    ) : (
-      <p className="mt-2 text-sm italic text-gray-500">
-        (Sin descripción)
+    {canAccessContent ? (
+  sortedPoints[arrivedPointIndex].description ? (
+    <div className="mt-2 space-y-2">
+      <p className="text-sm leading-relaxed">
+        {sortedPoints[arrivedPointIndex].description}
       </p>
-    )}
+
+      <button
+        type="button"
+        onClick={() =>
+          speak(sortedPoints[arrivedPointIndex].description!)
+        }
+        className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
+      >
+        🔊 Escuchar descripción
+      </button>
+    </div>
+  ) : (
+    <p className="mt-2 text-sm italic text-gray-500">
+      (Sin descripción)
+    </p>
+  )
+) : (
+  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+    🔒 Contenido exclusivo de esta ruta Premium.
+  </div>
+)}
 
   </div>
 )}

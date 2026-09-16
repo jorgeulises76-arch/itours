@@ -228,6 +228,7 @@ export default function RouteDetailPage() {
   points={points}
   routeId={route.id}
   onRouteStartedChange={setIsRouteStarted}
+  canAccessContent={!route.is_premium || isPremiumUnlocked}
 />
           </div>
 
