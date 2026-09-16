@@ -27,6 +27,7 @@ export default function RouteMap({
 }: RouteMapProps) {
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
+  const [locationError, setLocationError] = useState<string | null>(null)
 
   const ROUTE_PROGRESS_EXPIRY_MS = 6 * 60 * 60 * 1000
 
@@ -115,15 +116,37 @@ useEffect(() => {
 useEffect(() => {
   const watchId = navigator.geolocation.watchPosition(
     (position) => {
-  setUserPosition([
-    position.coords.latitude,
-    position.coords.longitude,
-  ])
-  setAccuracy(position.coords.accuracy)
-},
+      setUserPosition([
+        position.coords.latitude,
+        position.coords.longitude,
+      ])
+
+      setAccuracy(position.coords.accuracy)
+      setLocationError(null)
+    },
+
     (error) => {
       console.log('Error geolocation:', error)
+
+      if (error.code === error.PERMISSION_DENIED) {
+        setLocationError(
+          'iTours necesita acceso a tu ubicación para detectar automáticamente los puntos de la ruta.'
+        )
+      } else if (error.code === error.POSITION_UNAVAILABLE) {
+        setLocationError(
+          'No hemos podido obtener tu ubicación. Comprueba que la ubicación del dispositivo esté activada.'
+        )
+      } else if (error.code === error.TIMEOUT) {
+        setLocationError(
+          'Estamos tardando más de lo esperado en obtener tu ubicación. Inténtalo de nuevo en unos segundos.'
+        )
+      } else {
+        setLocationError(
+          'No hemos podido obtener tu ubicación en este momento.'
+        )
+      }
     },
+
     {
       enableHighAccuracy: true,
       maximumAge: 0,
@@ -368,6 +391,15 @@ const resumeNextPointIndex =
 return (
   <div className="mt-6 space-y-4">
     <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
+
+    {locationError && (
+      <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-900">
+        <p className="font-semibold">📍 Problema con la ubicación</p>
+        <p className="mt-1 text-sm leading-relaxed">
+          {locationError}
+        </p>
+      </div>
+    )}
 
     {lastCompletedPointIndex !== null &&
     arrivedPointIndex === null &&
