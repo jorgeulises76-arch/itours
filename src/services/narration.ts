@@ -139,8 +139,50 @@ function speakSegment(
     utterance.pitch = 1
     utterance.volume = 1
 
-    utterance.onend = () => resolve()
-    utterance.onerror = () => resolve()
+    utterance.onstart = () => {
+  console.log('🎧 AUDIO START', {
+    speaking: window.speechSynthesis.speaking,
+    paused: window.speechSynthesis.paused,
+    pending: window.speechSynthesis.pending,
+  })
+}
+
+utterance.onpause = () => {
+  console.log('⏸️ AUDIO PAUSE', {
+    speaking: window.speechSynthesis.speaking,
+    paused: window.speechSynthesis.paused,
+    pending: window.speechSynthesis.pending,
+  })
+}
+
+utterance.onresume = () => {
+  console.log('▶️ AUDIO RESUME', {
+    speaking: window.speechSynthesis.speaking,
+    paused: window.speechSynthesis.paused,
+    pending: window.speechSynthesis.pending,
+  })
+}
+
+utterance.onend = () => {
+  console.log('✅ AUDIO END', {
+    speaking: window.speechSynthesis.speaking,
+    paused: window.speechSynthesis.paused,
+    pending: window.speechSynthesis.pending,
+  })
+
+  resolve()
+}
+
+utterance.onerror = (event) => {
+  console.log('❌ AUDIO ERROR', {
+    error: event.error,
+    speaking: window.speechSynthesis.speaking,
+    paused: window.speechSynthesis.paused,
+    pending: window.speechSynthesis.pending,
+  })
+
+  resolve()
+}
 
     console.log(
       'VOZ SELECCIONADA:',
