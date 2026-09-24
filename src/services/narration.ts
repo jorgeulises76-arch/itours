@@ -14,6 +14,36 @@ const PAUSE_DURATIONS: Record<PauseType, number> = {
 
 let narrationId = 0
 
+const audioDebugLogs: string[] = []
+
+function addAudioDebugLog(message: string) {
+  const time = new Date().toLocaleTimeString()
+
+  audioDebugLogs.push(`${time} — ${message}`)
+
+  console.log(`🔎 ${time} — ${message}`)
+}
+
+export function getAudioDebugLogs() {
+  return [...audioDebugLogs]
+}
+
+export function getAudioDebugText() {
+  return audioDebugLogs.join('\n')
+}
+
+export function clearAudioDebugLogs() {
+  audioDebugLogs.length = 0
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    addAudioDebugLog('PAGE HIDDEN')
+  } else {
+    addAudioDebugLog('PAGE VISIBLE')
+  }
+})
+
 function wait(ms: number) {
   return new Promise<void>((resolve) => {
     setTimeout(resolve, ms)
@@ -140,6 +170,7 @@ function speakSegment(
     utterance.volume = 1
 
     utterance.onstart = () => {
+      addAudioDebugLog('AUDIO START')
   console.log('🎧 AUDIO START', {
     speaking: window.speechSynthesis.speaking,
     paused: window.speechSynthesis.paused,
@@ -148,6 +179,7 @@ function speakSegment(
 }
 
 utterance.onpause = () => {
+  addAudioDebugLog('AUDIO PAUSE')
   console.log('⏸️ AUDIO PAUSE', {
     speaking: window.speechSynthesis.speaking,
     paused: window.speechSynthesis.paused,
@@ -156,6 +188,7 @@ utterance.onpause = () => {
 }
 
 utterance.onresume = () => {
+  addAudioDebugLog('AUDIO RESUME')
   console.log('▶️ AUDIO RESUME', {
     speaking: window.speechSynthesis.speaking,
     paused: window.speechSynthesis.paused,
@@ -164,6 +197,7 @@ utterance.onresume = () => {
 }
 
 utterance.onend = () => {
+  addAudioDebugLog('AUDIO END')
   console.log('✅ AUDIO END', {
     speaking: window.speechSynthesis.speaking,
     paused: window.speechSynthesis.paused,
@@ -174,6 +208,7 @@ utterance.onend = () => {
 }
 
 utterance.onerror = (event) => {
+  addAudioDebugLog(`AUDIO ERROR: ${event.error}`)
   console.log('❌ AUDIO ERROR', {
     error: event.error,
     speaking: window.speechSynthesis.speaking,

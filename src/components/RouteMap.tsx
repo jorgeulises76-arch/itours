@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import {
   cancelNarration,
   cleanNarrationText,
+  getAudioDebugText,
   speakNarration,
 } from '../services/narration'
 
@@ -33,6 +34,7 @@ export default function RouteMap({
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
   const [locationError, setLocationError] = useState<string | null>(null)
+  const [audioDebugText, setAudioDebugText] = useState('')
 
   const ROUTE_PROGRESS_EXPIRY_MS = 6 * 60 * 60 * 1000
 
@@ -44,6 +46,7 @@ const [routeProgressIndex, setRouteProgressIndex] = useState(() => {
   const savedProgress = localStorage.getItem(progressKey)
   const savedLastCompleted = localStorage.getItem(lastCompletedKey)
   const savedLastActivity = localStorage.getItem(lastActivityKey)
+  
 
   const isExpired =
     savedLastActivity === null ||
@@ -382,6 +385,24 @@ const resumeNextPointIndex =
 return (
   <div className="mt-6 space-y-4">
     <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
+    <div className="rounded-2xl border border-purple-300 bg-purple-50 p-4 text-purple-900">
+  <p className="font-semibold">🔎 Diagnóstico de audio</p>
+
+  <button
+    type="button"
+    onClick={() => setAudioDebugText(getAudioDebugText())}
+    className="mt-3 rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold text-white"
+  >
+    Actualizar diagnóstico
+  </button>
+
+  {audioDebugText && (
+    <pre className="mt-3 whitespace-pre-wrap text-xs">
+      {audioDebugText}
+    </pre>
+  )}
+</div>
+
 
     {locationError && (
       <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-900">
