@@ -1,6 +1,11 @@
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useEffect, useState } from 'react'
+import {
+  cancelNarration,
+  cleanNarrationText,
+  speakNarration,
+} from '../services/narration'
 
 
 type Point = {
@@ -222,11 +227,11 @@ useEffect(() => {
   if (!currentPoint) return
 
   if (currentPoint.index !== lastSpokenPointIndex) {
-    speak(
-      `Has llegado a ${
-        currentPoint.point.name || `el punto ${currentPoint.index + 1}`
-      }`
-    )
+    speakNarration(
+  `Has llegado a ${
+    currentPoint.point.name || `el punto ${currentPoint.index + 1}`
+  }`
+)
     setLastSpokenPointIndex(currentPoint.index)
   }
 
@@ -251,7 +256,7 @@ function restartRoute() {
   setArrivedPointIndex(null)
   setLastSpokenPointIndex(null)
 
-  window.speechSynthesis.cancel()
+  cancelNarration()
 }
 
 const isLastPoint =
@@ -260,13 +265,6 @@ const isLastPoint =
 
 const isRouteCompleted =
   lastCompletedPointIndex === sortedPoints.length - 1
-console.log('ROUTE DEBUG:', {
-  routeId,
-  routeProgressIndex,
-  lastCompletedPointIndex,
-  pointsLength: sortedPoints.length,
-  isRouteCompleted,
-})
 
 let nextPoint: typeof nearestPoint = null
 
@@ -362,13 +360,6 @@ function getDistanceStatus(distanceKm: number) {
     message: 'Ya estás en la zona de inicio. ¡Disfruta el tour!',
   }
 }
-function speak(text: string) {
-  const utterance = new SpeechSynthesisUtterance(text)
-  utterance.lang = 'es-ES'
-  window.speechSynthesis.cancel()
-  window.speechSynthesis.speak(utterance)
-}
-
 
 function RecenterMap({ position }: { position: [number, number] | null }) {
   const map = useMap()
@@ -531,14 +522,18 @@ return (
     {canAccessContent ? (
   sortedPoints[arrivedPointIndex].description ? (
     <div className="mt-2 space-y-2">
-      <p className="text-sm leading-relaxed">
-        {sortedPoints[arrivedPointIndex].description}
-      </p>
+      <p className="text-sm leading-relaxed whitespace-pre-line">
+  {cleanNarrationText(
+    sortedPoints[arrivedPointIndex].description!
+  )}
+</p>
 
       <button
         type="button"
         onClick={() =>
-          speak(sortedPoints[arrivedPointIndex].description!)
+          speakNarration(
+  sortedPoints[arrivedPointIndex].description!
+)
         }
         className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
       >

@@ -5,6 +5,10 @@ import { supabase } from '../services/supabaseClient'
 import RouteMap from '../components/RouteMap'
 import molletImage from '../assets/Mollet.jpg'
 import parisRuta1Image from '../assets/paris-ruta1.jpg'
+import {
+  cleanNarrationText,
+  speakNarration,
+} from '../services/narration'
 
 
 type RouteData = {
@@ -31,7 +35,6 @@ export default function RouteDetailPage() {
   const [route, setRoute] = useState<RouteData | null>(null)
   const [points, setPoints] = useState<RoutePoint[]>([])
   const [selectedPoint, setSelectedPoint] = useState<RoutePoint | null>(null)
-  console.log('SELECTED POINT:', selectedPoint)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -109,27 +112,6 @@ export default function RouteDetailPage() {
     localStorage.setItem('unlockedPremiumRoutes', JSON.stringify(updatedRoutes))
     setIsPremiumUnlocked(true)
   }
-  function speak(text: string) {
-  if (!('speechSynthesis' in window)) {
-    alert('Este dispositivo no permite reproducción de voz.')
-    return
-  }
-
-  window.speechSynthesis.cancel()
-
-  const utterance = new SpeechSynthesisUtterance(text)
-
-  utterance.lang = 'es-ES'
-  utterance.rate = 0.95
-  utterance.pitch = 1
-  utterance.volume = 1
-
-  utterance.onerror = (event) => {
-    console.log('Error de voz:', event)
-  }
-
-  window.speechSynthesis.speak(utterance)
-}
 
   if (loading) {
     return <div className="p-6">Cargando detalle de ruta...</div>
@@ -332,17 +314,17 @@ export default function RouteDetailPage() {
           <button
             type="button"
             onClick={(e) => {
-              e.stopPropagation()
-              speak(point.description!)
-            }}
+  e.stopPropagation()
+  speakNarration(point.description!)
+}}
             className="relative z-50 mb-4 cursor-pointer rounded-full bg-teal-500 px-6 py-3 text-sm font-semibold text-white shadow-md pointer-events-auto"
           >
             🔊 Escuchar descripción
           </button>
 
-          <p className="text-sm leading-relaxed text-gray-600">
-            {point.description}
-          </p>
+          <p className="text-sm leading-relaxed text-gray-600 whitespace-pre-line">
+  {cleanNarrationText(point.description)}
+</p>
         </>
       ) : (
         <p className="text-sm italic text-gray-400">
