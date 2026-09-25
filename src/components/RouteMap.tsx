@@ -550,16 +550,18 @@ return (
 </p>
 
       <button
-        type="button"
-        onClick={() =>
-          speakNarration(
-  sortedPoints[arrivedPointIndex].description!
-)
-        }
-        className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
-      >
-        🔊 Escuchar descripción
-      </button>
+  type="button"
+  onClick={() => {
+    const audio = new Audio(
+      'https://cksqwhgmiqaameducncv.supabase.co/storage/v1/object/public/route-audio/es/paris/arc-de-triomphe-01.mp3'
+    )
+
+    audio.play()
+  }}
+  className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
+>
+  🔊 Escuchar descripción
+</button>
     </div>
   ) : (
     <p className="mt-2 text-sm italic text-gray-500">
