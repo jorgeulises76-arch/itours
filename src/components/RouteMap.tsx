@@ -1,10 +1,9 @@
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   cancelNarration,
   cleanNarrationText,
-  getAudioDebugText,
   speakNarration,
 } from '../services/narration'
 
@@ -34,7 +33,10 @@ export default function RouteMap({
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
   const [accuracy, setAccuracy] = useState<number | null>(null)
   const [locationError, setLocationError] = useState<string | null>(null)
-  const [audioDebugText, setAudioDebugText] = useState('')
+  
+
+  const descriptionAudioRef = useRef<HTMLAudioElement | null>(null)
+  const [isDescriptionPlaying, setIsDescriptionPlaying] = useState(false)
 
   const ROUTE_PROGRESS_EXPIRY_MS = 6 * 60 * 60 * 1000
 
@@ -385,25 +387,8 @@ const resumeNextPointIndex =
 return (
   <div className="mt-6 space-y-4">
     <h2 className="mb-3 text-xl font-semibold">Mapa de la ruta</h2>
-    <div className="rounded-2xl border border-purple-300 bg-purple-50 p-4 text-purple-900">
-  <p className="font-semibold">🔎 Diagnóstico de audio</p>
 
-  <button
-    type="button"
-    onClick={() => setAudioDebugText(getAudioDebugText())}
-    className="mt-3 rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold text-white"
-  >
-    Actualizar diagnóstico
-  </button>
-
-  {audioDebugText && (
-    <pre className="mt-3 whitespace-pre-wrap text-xs">
-      {audioDebugText}
-    </pre>
-  )}
-</div>
-
-
+   
     {locationError && (
       <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-900">
         <p className="font-semibold">📍 Problema con la ubicación</p>
@@ -552,16 +537,41 @@ return (
       <button
   type="button"
   onClick={() => {
-    const audio = new Audio(
-      'https://cksqwhgmiqaameducncv.supabase.co/storage/v1/object/public/route-audio/es/paris/arc-de-triomphe-01.mp3'
-    )
+    if (!descriptionAudioRef.current) {
+      const audio = new Audio(
+        'https://cksqwhgmiqaameducncv.supabase.co/storage/v1/object/public/route-audio/es/paris/arc-de-triomphe-01.mp3'
+      )
 
-    audio.play()
+      audio.addEventListener('play', () => {
+        setIsDescriptionPlaying(true)
+      })
+
+      audio.addEventListener('pause', () => {
+        setIsDescriptionPlaying(false)
+      })
+
+      audio.addEventListener('ended', () => {
+        setIsDescriptionPlaying(false)
+      })
+
+      descriptionAudioRef.current = audio
+    }
+
+    const audio = descriptionAudioRef.current
+
+    if (audio.paused) {
+      audio.play()
+    } else {
+      audio.pause()
+    }
   }}
   className="rounded-xl bg-green-700 px-4 py-2 text-sm font-semibold text-white"
 >
-  🔊 Escuchar descripción
+  {isDescriptionPlaying
+    ? '⏸️ Pausar narración'
+    : '▶️ Escuchar descripción'}
 </button>
+
     </div>
   ) : (
     <p className="mt-2 text-sm italic text-gray-500">
