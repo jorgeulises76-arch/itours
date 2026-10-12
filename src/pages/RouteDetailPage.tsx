@@ -369,6 +369,7 @@ export default function RouteDetailPage() {
 
           <p className="text-sm leading-relaxed text-gray-600 whitespace-pre-line">
   {cleanNarrationText(point.description)}
+  
 </p>
         </>
       ) : (

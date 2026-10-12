@@ -1,6 +1,7 @@
 export function cleanNarrationText(text: string) {
   return text
     .replace(/\[\[pause:(short|medium|look)\]\]/gi, '')
+    .replace(/<break\b[^>]*\/?>/gi, '')
     .replace(/[ \t]{2,}/g, ' ')
     .trim()
 }
