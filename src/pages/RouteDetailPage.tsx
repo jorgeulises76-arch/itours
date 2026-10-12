@@ -37,6 +37,14 @@ export default function RouteDetailPage() {
   const [points, setPoints] = useState<RoutePoint[]>([])
   const [selectedPoint, setSelectedPoint] = useState<RoutePoint | null>(null)
   const manualAudioRef = useRef<HTMLAudioElement | null>(null)
+  useEffect(() => {
+  const audio = manualAudioRef.current
+
+  if (audio) {
+    audio.pause()
+    audio.currentTime = 0
+  }
+}, [selectedPoint?.id])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
