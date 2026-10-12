@@ -37,6 +37,7 @@ export default function RouteDetailPage() {
   const [points, setPoints] = useState<RoutePoint[]>([])
   const [selectedPoint, setSelectedPoint] = useState<RoutePoint | null>(null)
   const manualAudioRef = useRef<HTMLAudioElement | null>(null)
+  const [isManualAudioPlaying, setIsManualAudioPlaying] = useState(false)
   useEffect(() => {
   const audio = manualAudioRef.current
 
@@ -348,16 +349,22 @@ export default function RouteDetailPage() {
   }
 
   if (audio.paused) {
-    void audio.play().catch((error) => {
+  void audio.play()
+    .then(() => {
+      setIsManualAudioPlaying(true)
+    })
+    .catch((error) => {
+      setIsManualAudioPlaying(false)
       console.error('Error al reproducir MP3:', error)
     })
-  } else {
-    audio.pause()
-  }
+} else {
+  audio.pause()
+  setIsManualAudioPlaying(false)
+}
 }}
             className="relative z-50 mb-4 cursor-pointer rounded-full bg-teal-500 px-6 py-3 text-sm font-semibold text-white shadow-md pointer-events-auto"
           >
-            🔊 Escuchar descripción
+            {isManualAudioPlaying ? '⏸️ Pausar narración' : '▶️ Escuchar descripción'}
           </button>
 
           <p className="text-sm leading-relaxed text-gray-600 whitespace-pre-line">
