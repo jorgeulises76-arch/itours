@@ -6,12 +6,14 @@ import {
   cleanNarrationText,
   speakNarration,
 } from '../services/narration'
+import { supabase } from '../services/supabaseClient'
 
 
 type Point = {
   id: string
   name: string | null
   description: string | null
+  audio_path: string | null
   latitude: number
   longitude: number
   order_number: number
@@ -37,6 +39,7 @@ export default function RouteMap({
 
   const descriptionAudioRef = useRef<HTMLAudioElement | null>(null)
   const [isDescriptionPlaying, setIsDescriptionPlaying] = useState(false)
+  
 
   const ROUTE_PROGRESS_EXPIRY_MS = 6 * 60 * 60 * 1000
 
@@ -80,7 +83,15 @@ const [routeProgressIndex, setRouteProgressIndex] = useState(() => {
 })
   const [lastSpokenPointIndex, setLastSpokenPointIndex] = useState<number | null>(null)
   const [arrivedPointIndex, setArrivedPointIndex] = useState<number | null>(null)
-  
+useEffect(() => {
+  const audio = descriptionAudioRef.current
+
+  if (audio) {
+    audio.pause()
+    audio.currentTime = 0
+    setIsDescriptionPlaying(false)
+  }
+}, [arrivedPointIndex])  
   const [lastCompletedPointIndex, setLastCompletedPointIndex] =
   useState<number | null>(() => {
     const savedLastCompleted = localStorage.getItem(
@@ -534,13 +545,23 @@ return (
   )}
 </p>
 
+{sortedPoints[arrivedPointIndex].audio_path && (
+
       <button
   type="button"
   onClick={() => {
+    const audioPath = sortedPoints[arrivedPointIndex!]?.audio_path
+
+    if (!audioPath) {
+      console.warn('Este punto no tiene audio asociado')
+      return
+    }
+
+    const audioUrl =
+      supabase.storage.from('route-audio').getPublicUrl(audioPath).data.publicUrl
+
     if (!descriptionAudioRef.current) {
-      const audio = new Audio(
-        'https://cksqwhgmiqaameducncv.supabase.co/storage/v1/object/public/route-audio/es/paris/arc-de-triomphe-01.mp3'
-      )
+      const audio = new Audio(audioUrl)
 
       audio.addEventListener('play', () => {
         setIsDescriptionPlaying(true)
@@ -559,8 +580,18 @@ return (
 
     const audio = descriptionAudioRef.current
 
+    if (audio.src !== audioUrl) {
+      audio.pause()
+      audio.src = audioUrl
+      audio.load()
+      setIsDescriptionPlaying(false)
+    }
+
     if (audio.paused) {
-      audio.play()
+      void audio.play().catch((error) => {
+        console.error('No se pudo reproducir el audio:', error)
+        setIsDescriptionPlaying(false)
+      })
     } else {
       audio.pause()
     }
@@ -571,6 +602,8 @@ return (
     ? '⏸️ Pausar narración'
     : '▶️ Escuchar descripción'}
 </button>
+)}
+
 
     </div>
   ) : (

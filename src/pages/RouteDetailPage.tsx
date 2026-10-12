@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Clock, MapPin, ListOrdered } from 'lucide-react'
 import { supabase } from '../services/supabaseClient'
@@ -25,6 +25,7 @@ type RoutePoint = {
   id: string
   name: string | null
   description: string | null
+  audio_path: string | null
   latitude: number
   longitude: number
   order_number: number
@@ -35,6 +36,7 @@ export default function RouteDetailPage() {
   const [route, setRoute] = useState<RouteData | null>(null)
   const [points, setPoints] = useState<RoutePoint[]>([])
   const [selectedPoint, setSelectedPoint] = useState<RoutePoint | null>(null)
+  const manualAudioRef = useRef<HTMLAudioElement | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -68,10 +70,10 @@ export default function RouteDetailPage() {
       setRoute(data)
 
       const { data: pointsData, error: pointsError } = await supabase
-        .from('route_points')
-        .select('id, name, description, latitude, longitude, order_number')
-        .eq('route_id', id)
-        .order('order_number', { ascending: true })
+  .from('route_points')
+  .select('id, name, description, audio_path, latitude, longitude, order_number')
+  .eq('route_id', id)
+  .order('order_number', { ascending: true })
 
       if (pointsError) {
         setError(pointsError.message)
@@ -315,7 +317,35 @@ export default function RouteDetailPage() {
             type="button"
             onClick={(e) => {
   e.stopPropagation()
-  speakNarration(point.description!)
+
+  if (!point.audio_path) {
+    speakNarration(point.description!)
+    return
+  }
+
+  const audioUrl = supabase.storage
+    .from('route-audio')
+    .getPublicUrl(point.audio_path).data.publicUrl
+
+  if (!manualAudioRef.current) {
+    manualAudioRef.current = new Audio(audioUrl)
+  }
+
+  const audio = manualAudioRef.current
+
+  if (audio.src !== audioUrl) {
+    audio.pause()
+    audio.src = audioUrl
+    audio.load()
+  }
+
+  if (audio.paused) {
+    void audio.play().catch((error) => {
+      console.error('Error al reproducir MP3:', error)
+    })
+  } else {
+    audio.pause()
+  }
 }}
             className="relative z-50 mb-4 cursor-pointer rounded-full bg-teal-500 px-6 py-3 text-sm font-semibold text-white shadow-md pointer-events-auto"
           >
