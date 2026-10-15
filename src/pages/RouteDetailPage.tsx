@@ -31,11 +31,29 @@ type RoutePoint = {
   order_number: number
 }
 
+
+type PointExtra = {
+  id: string
+  point_id: string
+  title: string
+  content: string
+  image_path: string | null
+  sort_order: number
+}
+
+
 export default function RouteDetailPage() {
   const { id } = useParams()
   const [route, setRoute] = useState<RouteData | null>(null)
   const [points, setPoints] = useState<RoutePoint[]>([])
+  const [pointExtras, setPointExtras] = useState<PointExtra[]>([])
   const [selectedPoint, setSelectedPoint] = useState<RoutePoint | null>(null)
+  const [isQsmOpen, setIsQsmOpen] = useState(false)
+  
+useEffect(() => {
+  setIsQsmOpen(false)
+}, [selectedPoint?.id])
+
   const manualAudioRef = useRef<HTMLAudioElement | null>(null)
   const [isManualAudioPlaying, setIsManualAudioPlaying] = useState(false)
   useEffect(() => {
@@ -89,6 +107,24 @@ export default function RouteDetailPage() {
       } else {
         setPoints(pointsData || [])
       }
+
+      
+const { data: extrasData, error: extrasError } = await supabase
+  .from('point_extras')
+  .select('id, point_id, title, content, image_path, sort_order')
+  .eq('is_published', true)
+  .in(
+    'point_id',
+    (pointsData || []).map((point) => point.id)
+  )
+  .order('sort_order', { ascending: true })
+
+if (extrasError) {
+  console.error('Error al cargar QSM:', extrasError)
+} else {
+  setPointExtras(extrasData || [])
+}
+
 
       setLoading(false)
     }
@@ -366,6 +402,39 @@ export default function RouteDetailPage() {
           >
             {isManualAudioPlaying ? '⏸️ Pausar narración' : '▶️ Escuchar descripción'}
           </button>
+
+          
+{pointExtras.some((extra) => extra.point_id === point.id) && (
+  <button
+    type="button"
+    onClick={() => setIsQsmOpen((open) => !open)}
+    aria-expanded={isQsmOpen}
+    className="relative z-50 mb-4 ml-2 cursor-pointer rounded-full border border-teal-500 bg-white px-6 py-3 text-sm font-semibold text-teal-700 shadow-sm"
+  >
+    📖 {isQsmOpen ? 'Cerrar información' : 'Quiero saber más'}
+  </button>
+)}
+
+
+{isQsmOpen &&
+  pointExtras
+    .filter((extra) => extra.point_id === point.id)
+    .map((extra) => (
+      <div
+        key={extra.id}
+        className="mb-4 rounded-2xl border border-teal-200 bg-teal-50 p-4"
+      >
+        <h4 className="mb-3 text-base font-bold text-teal-900">
+          {extra.title}
+        </h4>
+
+        <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">
+          {extra.content}
+        </p>
+      </div>
+    ))}
+
+
 
           <p className="text-sm leading-relaxed text-gray-600 whitespace-pre-line">
   {cleanNarrationText(point.description)}
