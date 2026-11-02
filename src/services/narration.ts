@@ -1,5 +1,7 @@
 export function cleanNarrationText(text: string) {
   return text
+    .replace(/\\r\\n/g, '\n')
+    .replace(/\\n/g, '\n')
     .replace(/\[\[pause:(short|medium|look)\]\]/gi, '')
     .replace(/<break\b[^>]*\/?>/gi, '')
     .replace(/[ \t]{2,}/g, ' ')

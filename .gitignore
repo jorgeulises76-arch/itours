@@ -24,3 +24,11 @@ dist-ssr
 *.sw?
 
 .env
+# Variables de entorno y credenciales
+.env
+.env.*
+!.env.example
+
+# Copias de seguridad locales
+*.bak
+*.backup
