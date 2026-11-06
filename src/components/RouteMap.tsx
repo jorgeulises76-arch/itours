@@ -539,13 +539,7 @@ return (
     {canAccessContent ? (
   sortedPoints[arrivedPointIndex].description ? (
     <div className="mt-2 space-y-2">
-      <p className="text-sm leading-relaxed whitespace-pre-line">
-  {cleanNarrationText(
-    sortedPoints[arrivedPointIndex].description!
-  )}
-</p>
-
-{sortedPoints[arrivedPointIndex].audio_path && (
+      {sortedPoints[arrivedPointIndex].audio_path && (
 
       <button
   type="button"
@@ -603,6 +597,12 @@ return (
     : '▶️ Escuchar descripción'}
 </button>
 )}
+
+<p className="text-sm leading-relaxed whitespace-pre-line">
+  {cleanNarrationText(
+    sortedPoints[arrivedPointIndex].description!
+  )}
+</p>
 
 
     </div>
