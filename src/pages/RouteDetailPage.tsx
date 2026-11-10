@@ -49,9 +49,11 @@ export default function RouteDetailPage() {
   const [pointExtras, setPointExtras] = useState<PointExtra[]>([])
   const [selectedPoint, setSelectedPoint] = useState<RoutePoint | null>(null)
   const [isQsmOpen, setIsQsmOpen] = useState(false)
+  const [openExtraId, setOpenExtraId] = useState<string | null>(null)
   
 useEffect(() => {
   setIsQsmOpen(false)
+  setOpenExtraId(null)
 }, [selectedPoint?.id])
 
   const manualAudioRef = useRef<HTMLAudioElement | null>(null)
@@ -422,15 +424,34 @@ if (extrasError) {
     .map((extra) => (
       <div
         key={extra.id}
-        className="mb-4 rounded-2xl border border-teal-200 bg-teal-50 p-4"
+        className="mb-3 overflow-hidden rounded-2xl border border-teal-200 bg-teal-50"
       >
-        <h4 className="mb-3 text-base font-bold text-teal-900">
-          {extra.title}
-        </h4>
+        <button
+          type="button"
+          onClick={() =>
+            setOpenExtraId((current) =>
+              current === extra.id ? null : extra.id
+            )
+          }
+          aria-expanded={openExtraId === extra.id}
+          className="flex w-full cursor-pointer items-center justify-between gap-3 p-4 text-left"
+        >
+          <span className="text-sm font-semibold text-teal-900">
+            {extra.title}
+          </span>
 
-        <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">
-          {extra.content}
-        </p>
+          <span className="shrink-0 text-teal-700">
+            {openExtraId === extra.id ? '▲' : '▼'}
+          </span>
+        </button>
+
+        {openExtraId === extra.id && (
+          <div className="border-t border-teal-200 px-4 pb-4 pt-3">
+            <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">
+              {extra.content}
+            </p>
+          </div>
+        )}
       </div>
     ))}
 
