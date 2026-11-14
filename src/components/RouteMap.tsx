@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import {
   cancelNarration,
   cleanNarrationText,
-  speakNarration,
 } from '../services/narration'
 import { supabase } from '../services/supabaseClient'
 
@@ -38,6 +37,7 @@ export default function RouteMap({
   
 
   const descriptionAudioRef = useRef<HTMLAudioElement | null>(null)
+  const arrivalAudioRef = useRef<HTMLAudioElement | null>(null)
   const [isDescriptionPlaying, setIsDescriptionPlaying] = useState(false)
   
 
@@ -243,11 +243,21 @@ useEffect(() => {
   if (!currentPoint) return
 
   if (currentPoint.index !== lastSpokenPointIndex) {
-    speakNarration(
-  `Has llegado a ${
-    currentPoint.point.name || `el punto ${currentPoint.index + 1}`
-  }`
-)
+    const audioUrl = supabase.storage
+  .from('route-audio')
+  .getPublicUrl('es/common/hemos-llegado.mp3').data.publicUrl
+
+if (!arrivalAudioRef.current) {
+  arrivalAudioRef.current = new Audio(audioUrl)
+}
+
+const arrivalAudio = arrivalAudioRef.current
+
+arrivalAudio.currentTime = 0
+
+void arrivalAudio.play().catch((error) => {
+  console.warn('No se pudo reproducir el aviso de llegada:', error)
+})
     setLastSpokenPointIndex(currentPoint.index)
   }
 
