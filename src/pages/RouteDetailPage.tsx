@@ -260,6 +260,7 @@ if (extrasError) {
         <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
             <RouteMap
   points={points}
+  pointExtras={pointExtras}
   routeId={route.id}
   onRouteStartedChange={setIsRouteStarted}
   canAccessContent={!route.is_premium || isPremiumUnlocked}

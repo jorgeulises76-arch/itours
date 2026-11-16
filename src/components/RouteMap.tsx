@@ -18,8 +18,18 @@ type Point = {
   order_number: number
 }
 
+type PointExtra = {
+  id: string
+  point_id: string
+  title: string
+  content: string
+  image_path: string | null
+  sort_order: number
+}
+
 type RouteMapProps = {
   points: Point[]
+  pointExtras: PointExtra[]
   routeId: string
   onRouteStartedChange?: (started: boolean) => void
   canAccessContent: boolean
@@ -27,6 +37,7 @@ type RouteMapProps = {
 
 export default function RouteMap({
   points,
+  pointExtras,  
   routeId,
   onRouteStartedChange,
   canAccessContent,
@@ -39,6 +50,9 @@ export default function RouteMap({
   const descriptionAudioRef = useRef<HTMLAudioElement | null>(null)
   const arrivalAudioRef = useRef<HTMLAudioElement | null>(null)
   const [isDescriptionPlaying, setIsDescriptionPlaying] = useState(false)
+  const [isGpsDescriptionOpen, setIsGpsDescriptionOpen] = useState(false)
+  const [isGpsQsmOpen, setIsGpsQsmOpen] = useState(false)
+  const [openGpsExtraId, setOpenGpsExtraId] = useState<string | null>(null)
   
 
   const ROUTE_PROGRESS_EXPIRY_MS = 6 * 60 * 60 * 1000
@@ -83,6 +97,13 @@ const [routeProgressIndex, setRouteProgressIndex] = useState(() => {
 })
   const [lastSpokenPointIndex, setLastSpokenPointIndex] = useState<number | null>(null)
   const [arrivedPointIndex, setArrivedPointIndex] = useState<number | null>(null)
+
+  useEffect(() => {
+  setIsGpsDescriptionOpen(false)
+  setIsGpsQsmOpen(false)
+  setOpenGpsExtraId(null)
+}, [arrivedPointIndex])
+
 useEffect(() => {
   const audio = descriptionAudioRef.current
 
@@ -608,12 +629,76 @@ return (
 </button>
 )}
 
-<p className="text-sm leading-relaxed whitespace-pre-line">
-  {cleanNarrationText(
-    sortedPoints[arrivedPointIndex].description!
-  )}
-</p>
+<button
+  type="button"
+  onClick={() => setIsGpsDescriptionOpen((open) => !open)}
+  aria-expanded={isGpsDescriptionOpen}
+  className="rounded-xl border border-green-700 bg-white px-4 py-2 text-sm font-semibold text-green-800"
+>
+  📖 {isGpsDescriptionOpen ? 'Ocultar descripción' : 'Leer descripción'}
+</button>
 
+{isGpsDescriptionOpen && (
+  <p className="text-sm leading-relaxed whitespace-pre-line">
+    {cleanNarrationText(
+      sortedPoints[arrivedPointIndex].description!
+    )}
+  </p>
+)}
+
+{pointExtras.some(
+  (extra) => extra.point_id === sortedPoints[arrivedPointIndex].id
+) && (
+  <div className="mt-3">
+    <button
+      type="button"
+      onClick={() => {
+        setIsGpsQsmOpen((open) => !open)
+        setOpenGpsExtraId(null)
+      }}
+      aria-expanded={isGpsQsmOpen}
+      className="rounded-xl border border-teal-600 bg-white px-4 py-2 text-sm font-semibold text-teal-800"
+    >
+      📚 {isGpsQsmOpen ? 'Cerrar información' : 'Quiero saber más'}
+    </button>
+
+    {isGpsQsmOpen && (
+      <div className="mt-3 space-y-2">
+        {pointExtras
+          .filter(
+            (extra) =>
+              extra.point_id === sortedPoints[arrivedPointIndex].id
+          )
+          .map((extra) => (
+            <div
+              key={extra.id}
+              className="overflow-hidden rounded-xl border border-teal-200 bg-teal-50"
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenGpsExtraId((current) =>
+                    current === extra.id ? null : extra.id
+                  )
+                }
+                aria-expanded={openGpsExtraId === extra.id}
+                className="flex w-full items-center justify-between gap-3 p-3 text-left text-sm font-semibold text-teal-900"
+              >
+                <span>{extra.title}</span>
+                <span>{openGpsExtraId === extra.id ? '▲' : '▼'}</span>
+              </button>
+
+              {openGpsExtraId === extra.id && (
+                <p className="whitespace-pre-line border-t border-teal-200 p-3 text-sm leading-relaxed text-gray-700">
+                  {extra.content}
+                </p>
+              )}
+            </div>
+          ))}
+      </div>
+    )}
+  </div>
+)}
 
     </div>
   ) : (
