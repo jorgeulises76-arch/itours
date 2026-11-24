@@ -6,6 +6,7 @@ import RouteMap from '../components/RouteMap'
 import RouteWelcome from '../components/RouteWelcome'
 import molletImage from '../assets/Mollet.jpg'
 import casaBatlloImage from '../assets/Casa batllo R2.jpeg'
+import bcnR1Image from '../assets/Bcn R1.jpg'
 import parisRuta1Image from '../assets/paris-ruta1.jpg'
 import {
   cleanNarrationText,
@@ -189,11 +190,13 @@ if (extrasError) {
   !route.is_premium || isPremiumUnlocked
 
   const routeImage =
-  route.id === 'a554a1d4-40b1-45b3-85cb-dc2d32f98974'
-    ? casaBatlloImage
-    : route.city_id === '7c33ef71-1361-48ef-83ca-9ed66aaac565'
-      ? parisRuta1Image
-      : molletImage
+  route.id === '7548d7d4-5e83-44b4-a6e4-ed15f2ebcc82'
+    ? bcnR1Image
+    : route.id === 'a554a1d4-40b1-45b3-85cb-dc2d32f98974'
+      ? casaBatlloImage
+      : route.city_id === '7c33ef71-1361-48ef-83ca-9ed66aaac565'
+        ? parisRuta1Image
+        : molletImage
 
   return (
     <div className="min-h-screen bg-gray-100">
