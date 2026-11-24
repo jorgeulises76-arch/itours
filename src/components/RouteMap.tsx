@@ -470,6 +470,11 @@ return (
               >
                 🧭 Ir a la siguiente parada
               </a>
+              <p className="mt-3 rounded-xl bg-white/80 p-3 text-sm leading-relaxed">
+  📱 Sigue las indicaciones de Google Maps.
+  Cuando llegues a tu destino, recuerda volver a iTours
+  para escuchar la historia del lugar.
+</p>
             </>
           )}
         </div>
@@ -553,6 +558,11 @@ return (
   📍 Empezar desde aquí
 </a>
         </div>
+        <p className="mt-3 rounded-xl bg-white/80 p-3 text-sm leading-relaxed text-blue-800">
+  📱 Sigue las indicaciones de Google Maps.
+  Cuando llegues a tu destino, recuerda volver a iTours
+  para escuchar la historia del lugar.
+</p>
       </div>
     )}
 
@@ -766,8 +776,10 @@ return (
   🧭 Ir a la siguiente parada
 </a>
 
-<p className="mt-2 text-center text-xs text-gray-500">
-  Disfruta del paseo. Al llegar al siguiente lugar, iTours te contará su historia.
+<p className="mt-3 rounded-xl bg-white/80 p-3 text-sm leading-relaxed text-purple-800">
+  📱 Sigue las indicaciones de Google Maps.
+  Cuando llegues a tu destino, recuerda volver a iTours
+  para escuchar la historia del lugar.
 </p>
 
   </div>

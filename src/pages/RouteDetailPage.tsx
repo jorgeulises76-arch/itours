@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Clock, MapPin, ListOrdered } from 'lucide-react'
 import { supabase } from '../services/supabaseClient'
 import RouteMap from '../components/RouteMap'
+import RouteWelcome from '../components/RouteWelcome'
 import molletImage from '../assets/Mollet.jpg'
 import casaBatlloImage from '../assets/Casa batllo R2.jpeg'
 import parisRuta1Image from '../assets/paris-ruta1.jpg'
@@ -50,6 +51,16 @@ export default function RouteDetailPage() {
   const [pointExtras, setPointExtras] = useState<PointExtra[]>([])
   const [selectedPoint, setSelectedPoint] = useState<RoutePoint | null>(null)
   const [isQsmOpen, setIsQsmOpen] = useState(false)
+  const [isWelcomeOpen, setIsWelcomeOpen] = useState(false)
+
+useEffect(() => {
+  const welcomeSeen = localStorage.getItem('itours-welcome-seen')
+
+  if (!welcomeSeen) {
+    setIsWelcomeOpen(true)
+  }
+}, [])
+
   const [openExtraId, setOpenExtraId] = useState<string | null>(null)
   
 useEffect(() => {
@@ -253,9 +264,29 @@ if (extrasError) {
           </p>
         </div>
       )}
+   
     </div>
   </>
 )}
+
+{isWelcomeOpen && (
+  <RouteWelcome
+    onClose={() => {
+      localStorage.setItem('itours-welcome-seen', 'true')
+      setIsWelcomeOpen(false)
+    }}
+  />
+)}
+
+<div className="mb-3 flex justify-end">
+  <button
+    type="button"
+    onClick={() => setIsWelcomeOpen(true)}
+    className="rounded-xl border border-teal-200 bg-white px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm"
+  >
+    ℹ️ Cómo funciona
+  </button>
+</div>
 
         <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
             <RouteMap
