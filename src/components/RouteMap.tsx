@@ -57,6 +57,45 @@ export default function RouteMap({
 
   const ROUTE_PROGRESS_EXPIRY_MS = 6 * 60 * 60 * 1000
 
+  const isModernistRoute =
+  routeId === 'a554a1d4-40b1-45b3-85cb-dc2d32f98974'
+  const [routeBranch, setRouteBranch] =
+  useState<'walking' | 'metro' | null>(() => {
+    if (!isModernistRoute) return null
+
+    const branchKey = `itours-v2-route-branch-${routeId}`
+    const savedLastActivity = localStorage.getItem(
+      `itours-v2-route-last-activity-${routeId}`
+    )
+
+    const isExpired =
+      savedLastActivity === null ||
+      Date.now() - Number(savedLastActivity) > ROUTE_PROGRESS_EXPIRY_MS
+
+    if (isExpired) {
+      localStorage.removeItem(branchKey)
+      return null
+    }
+
+    const savedBranch = localStorage.getItem(branchKey)
+
+    return savedBranch === 'walking' || savedBranch === 'metro'
+      ? savedBranch
+      : null
+  })
+
+useEffect(() => {
+  if (!isModernistRoute) return
+
+  const branchKey = `itours-v2-route-branch-${routeId}`
+
+  if (routeBranch === null) {
+    localStorage.removeItem(branchKey)
+  } else {
+    localStorage.setItem(branchKey, routeBranch)
+  }
+}, [routeId, isModernistRoute, routeBranch])  
+
 const [routeProgressIndex, setRouteProgressIndex] = useState(() => {
   const progressKey = `itours-v2-route-progress-${routeId}`
   const lastCompletedKey = `itours-v2-route-last-completed-${routeId}`
@@ -85,13 +124,20 @@ const [routeProgressIndex, setRouteProgressIndex] = useState(() => {
       : 0
 
   if (savedLastCompleted !== null) {
-    const lastCompletedIndex = Number(savedLastCompleted)
-    const nextIndex = lastCompletedIndex + 1
+  const lastCompletedIndex = Number(savedLastCompleted)
 
-    if (nextIndex < points.length) {
-      return Math.max(progressIndex, nextIndex)
-    }
+  if (isModernistRoute && lastCompletedIndex === 6) {
+    if (routeBranch === null) return 6
+    if (routeBranch === 'walking') return 7
+    if (routeBranch === 'metro') return 8
   }
+
+  const nextIndex = lastCompletedIndex + 1
+
+  if (nextIndex < points.length) {
+    return Math.max(progressIndex, nextIndex)
+  }
+}
 
   return progressIndex
 })
@@ -238,8 +284,22 @@ if (userPosition && sortedPoints.length > 0) {
     current.distance < closest.distance ? current : closest
   )
 }
+const isAwaitingBranchChoice =
+  isModernistRoute &&
+  lastCompletedPointIndex === 6 &&
+  routeBranch === null
 
-const targetRoutePoint = sortedPoints[routeProgressIndex] || null
+const navigationTravelMode =
+  isModernistRoute &&
+  routeBranch === 'metro' &&
+  lastCompletedPointIndex === 6 &&
+  routeProgressIndex === 8
+    ? 'transit'
+    : 'walking'
+
+const targetRoutePoint = isAwaitingBranchChoice
+  ? null
+  : sortedPoints[routeProgressIndex] || null
 
 const distanceToTargetPoint =
   userPosition && targetRoutePoint
@@ -287,16 +347,42 @@ void arrivalAudio.play().catch((error) => {
   setLastCompletedPointIndex(currentPoint.index)
 
   if (currentPoint.index < sortedPoints.length - 1) {
+  if (isModernistRoute && currentPoint.index === 6) {
+    if (routeBranch === 'walking') {
+      setRouteProgressIndex(7)
+    } else if (routeBranch === 'metro') {
+      setRouteProgressIndex(8)
+    }
+  } else {
     setRouteProgressIndex(currentPoint.index + 1)
   }
 }
-}, [currentPoint, lastSpokenPointIndex, routeProgressIndex, sortedPoints.length])
+}
+}, [
+  currentPoint,
+  lastSpokenPointIndex,
+  routeProgressIndex,
+  sortedPoints.length,
+  isModernistRoute,
+  routeBranch,
+])
 
+function chooseRouteBranch(branch: 'walking' | 'metro') {
+  if (!isAwaitingBranchChoice) return
+
+  setRouteBranch(branch)
+  setRouteProgressIndex(branch === 'walking' ? 7 : 8)
+}
 
 function restartRoute() {
   localStorage.removeItem(`itours-v2-route-progress-${routeId}`)
   localStorage.removeItem(`itours-v2-route-last-completed-${routeId}`)
   localStorage.removeItem(`itours-v2-route-last-activity-${routeId}`)
+
+  if (isModernistRoute) {
+    localStorage.removeItem(`itours-v2-route-branch-${routeId}`)
+    setRouteBranch(null)
+  }
 
   setRouteProgressIndex(0)
   setLastCompletedPointIndex(null)
@@ -443,6 +529,7 @@ return (
     {lastCompletedPointIndex !== null &&
     arrivedPointIndex === null &&
       !isRouteCompleted &&
+      !isAwaitingBranchChoice &&
       !currentPoint &&
       sortedPoints[lastCompletedPointIndex] && (
         <div className="rounded-2xl border border-teal-200 bg-teal-50 p-4 text-teal-800">
@@ -463,7 +550,7 @@ return (
               </p>
 
               <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${sortedPoints[resumeNextPointIndex].latitude},${sortedPoints[resumeNextPointIndex].longitude}&travelmode=walking`}
+                href={`https://www.google.com/maps/dir/?api=1&destination=${sortedPoints[resumeNextPointIndex].latitude},${sortedPoints[resumeNextPointIndex].longitude}&travelmode=${navigationTravelMode}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-3 inline-block rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white"
@@ -757,8 +844,69 @@ return (
   </div>
 )}
 
+{isAwaitingBranchChoice && (
+  <div className="mt-4 rounded-2xl border border-teal-200 bg-teal-50 p-4">
+    <h3 className="text-lg font-bold text-teal-800">
+      Estamos llegando al final de la ruta
+    </h3>
 
-    {nextPoint && !isLastPoint && !isRouteCompleted && (
+    <p className="mt-2 text-sm leading-relaxed text-gray-700">
+      Desde este punto hasta la Sagrada Família nos espera
+      un paseo de aproximadamente <strong>25 minutos (1,5 km).</strong>
+    </p>
+
+    <p className="mt-2 text-sm leading-relaxed text-gray-700">
+      Puedes seguir la ruta caminando y descubrir una joya
+      más del modernismo barcelonés. O, si lo prefieres,
+      puedes ir directamente en metro.
+    </p>
+
+    <div className="mt-4 space-y-3">
+      <button
+        type="button"
+        onClick={() => chooseRouteBranch('walking')}
+        className="w-full rounded-xl border border-teal-200 bg-white p-4 text-left shadow-sm"
+      >
+        <p className="font-bold text-teal-800">
+          🚶 Continuar a pie
+        </p>
+
+        <p className="mt-1 text-sm font-semibold text-teal-600">
+          Pasea por el Eixample con una parada adicional
+        </p>
+
+        <p className="mt-2 text-sm leading-relaxed text-gray-600">
+          Descubre la historia y los secretos de la Casa
+          de les Punxes antes de llegar a la Sagrada Família.
+        </p>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => chooseRouteBranch('metro')}
+        className="w-full rounded-xl border border-teal-200 bg-white p-4 text-left shadow-sm"
+      >
+        <p className="font-bold text-teal-800">
+          🚇 Continuar en metro
+        </p>
+
+        <p className="mt-2 text-sm leading-relaxed text-gray-600">
+          Si estás cansado o prefieres caminar menos,
+          dirígete directamente a la Sagrada Família.
+        </p>
+      </button>
+    </div>
+
+    <p className="mt-4 text-center text-sm italic text-teal-800">
+      Recuerda: con iTours, tú marcas el ritmo.
+    </p>
+  </div>
+)}
+
+    {nextPoint &&
+  !isLastPoint &&
+  !isRouteCompleted &&
+  !isAwaitingBranchChoice && (
   <div className="mt-4 rounded-2xl border border-purple-200 bg-purple-50 p-4 text-purple-800">
     <p className="text-lg font-semibold">
       ➡️ Siguiente parada: {nextPoint.point.name || `Punto ${nextPoint.index + 1}`}
@@ -768,7 +916,7 @@ return (
       A {nextPoint.distance.toFixed(2)} km de tu posición actual.
     </p>
     <a
-  href={`https://www.google.com/maps/dir/?api=1&destination=${nextPoint.point.latitude},${nextPoint.point.longitude}&travelmode=walking`}
+  href={`https://www.google.com/maps/dir/?api=1&destination=${nextPoint.point.latitude},${nextPoint.point.longitude}&travelmode=${navigationTravelMode}`}
   target="_blank"
   rel="noopener noreferrer"
   className="mt-3 inline-block rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
