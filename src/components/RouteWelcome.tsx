@@ -4,12 +4,12 @@ type RouteWelcomeProps = {
 
 export default function RouteWelcome({ onClose }: RouteWelcomeProps) {
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-4">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="route-welcome-title"
-        className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-xl"
+        className="max-h-[85dvh] w-full max-w-md -translate-y-4 overflow-y-auto rounded-3xl bg-white p-4 shadow-xl [@media(max-height:700px)]:p-3 [@media(max-height:700px)]:max-h-[92dvh]"
       >
         <p className="text-center text-2xl font-bold text-teal-600">
           iTours
@@ -17,9 +17,9 @@ export default function RouteWelcome({ onClose }: RouteWelcomeProps) {
 
         <h2
           id="route-welcome-title"
-          className="mt-4 text-center text-2xl font-bold text-gray-800"
+          className="mt-2 text-center text-xl font-bold text-gray-800"
         >
-          ¡Bienvenido a tu experiencia!
+          ¡Bienvenido a iTours!
         </h2>
 
         <p className="mt-3 text-center text-sm leading-relaxed text-gray-600">
@@ -27,8 +27,8 @@ export default function RouteWelcome({ onClose }: RouteWelcomeProps) {
           y cuándo escuchar cada historia.
         </p>
 
-        <div className="mt-6 space-y-4">
-          <div className="rounded-2xl bg-teal-50 p-4">
+        <div className="mt-4 space-y-2">
+          <div className="rounded-2xl bg-teal-50 p-3 [@media(max-height:700px)]:p-2">
             <h3 className="font-bold text-teal-800">
               🧭 1. Dirígete al siguiente punto
             </h3>
@@ -38,7 +38,7 @@ export default function RouteWelcome({ onClose }: RouteWelcomeProps) {
             </p>
           </div>
 
-          <div className="rounded-2xl bg-teal-50 p-4">
+          <div className="rounded-2xl bg-teal-50 p-3 [@media(max-height:700px)]:p-2">
             <h3 className="font-bold text-teal-800">
               📱 2. Vuelve a iTours
             </h3>
@@ -49,7 +49,7 @@ export default function RouteWelcome({ onClose }: RouteWelcomeProps) {
             </p>
           </div>
 
-          <div className="rounded-2xl bg-teal-50 p-4">
+          <div className="rounded-2xl bg-teal-50 p-3 [@media(max-height:700px)]:p-2">
             <h3 className="font-bold text-teal-800">
               🎧 3. Escucha cuando quieras
             </h3>
@@ -64,7 +64,7 @@ export default function RouteWelcome({ onClose }: RouteWelcomeProps) {
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 w-full rounded-2xl bg-teal-600 px-5 py-4 font-bold text-white shadow-md"
+          className="mt-3 w-full rounded-2xl bg-teal-600 px-5 py-3 font-bold text-white shadow-md"
         >
           Entendido, ¡vamos allá!
         </button>
