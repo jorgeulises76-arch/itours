@@ -12,6 +12,7 @@ import {
   cleanNarrationText,
   speakNarration,
 } from '../services/narration'
+import QsmImages, { type PointExtraImage } from '../components/QsmImages'
 
 
 type RouteData = {
@@ -44,12 +45,12 @@ type PointExtra = {
   sort_order: number
 }
 
-
 export default function RouteDetailPage() {
   const { id } = useParams()
   const [route, setRoute] = useState<RouteData | null>(null)
   const [points, setPoints] = useState<RoutePoint[]>([])
   const [pointExtras, setPointExtras] = useState<PointExtra[]>([])
+  const [pointExtraImages, setPointExtraImages] = useState<PointExtraImage[]>([])
   const [selectedPoint, setSelectedPoint] = useState<RoutePoint | null>(null)
   const [isQsmOpen, setIsQsmOpen] = useState(false)
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false)
@@ -136,8 +137,29 @@ const { data: extrasData, error: extrasError } = await supabase
 
 if (extrasError) {
   console.error('Error al cargar QSM:', extrasError)
+  setPointExtraImages([])
 } else {
+
   setPointExtras(extrasData || [])
+
+
+
+  if (extrasData && extrasData.length > 0) {
+  const { data: imagesData, error: imagesError } = await supabase
+    .from('point_extra_images')
+    .select('id, extra_id, image_path, caption, author, license, license_url, source_url, modifications, sort_order')
+    .in('extra_id', extrasData.map((extra) => extra.id))
+    .order('sort_order', { ascending: true })
+
+  if (imagesError) {
+    console.error('Error al cargar imágenes QSM:', imagesError)
+    setPointExtraImages([])
+  } else {
+    setPointExtraImages(imagesData || [])
+  }
+} else {
+  setPointExtraImages([])
+}
 }
 
 
@@ -295,6 +317,7 @@ if (extrasError) {
             <RouteMap
   points={points}
   pointExtras={pointExtras}
+  pointExtraImages={pointExtraImages}
   routeId={route.id}
   onRouteStartedChange={setIsRouteStarted}
   canAccessContent={!route.is_premium || isPremiumUnlocked}
@@ -484,12 +507,18 @@ if (extrasError) {
         </button>
 
         {openExtraId === extra.id && (
-          <div className="border-t border-teal-200 px-4 pb-4 pt-3">
-            <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">
-              {extra.content}
-            </p>
-          </div>
-        )}
+  <div className="border-t border-teal-200 px-4 pb-4 pt-3">
+    <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">
+      {extra.content}
+    </p>
+
+    <QsmImages
+      images={pointExtraImages.filter(
+        (image) => image.extra_id === extra.id
+      )}
+    />
+  </div>
+)}
       </div>
     ))}
 

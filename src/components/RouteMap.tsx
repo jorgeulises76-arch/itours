@@ -6,6 +6,7 @@ import {
   cleanNarrationText,
 } from '../services/narration'
 import { supabase } from '../services/supabaseClient'
+import QsmImages, { type PointExtraImage } from './QsmImages'
 
 
 type Point = {
@@ -30,6 +31,7 @@ type PointExtra = {
 type RouteMapProps = {
   points: Point[]
   pointExtras: PointExtra[]
+  pointExtraImages: PointExtraImage[]
   routeId: string
   onRouteStartedChange?: (started: boolean) => void
   canAccessContent: boolean
@@ -37,7 +39,8 @@ type RouteMapProps = {
 
 export default function RouteMap({
   points,
-  pointExtras,  
+  pointExtras,
+  pointExtraImages,  
   routeId,
   onRouteStartedChange,
   canAccessContent,
@@ -786,10 +789,18 @@ return (
               </button>
 
               {openGpsExtraId === extra.id && (
-                <p className="whitespace-pre-line border-t border-teal-200 p-3 text-sm leading-relaxed text-gray-700">
-                  {extra.content}
-                </p>
-              )}
+  <div className="border-t border-teal-200 p-3">
+    <p className="whitespace-pre-line text-sm leading-relaxed text-gray-700">
+      {extra.content}
+    </p>
+
+    <QsmImages
+      images={pointExtraImages.filter(
+        (image) => image.extra_id === extra.id
+      )}
+    />
+  </div>
+)}
             </div>
           ))}
       </div>
